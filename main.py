@@ -1,4 +1,6 @@
 from fastapi import FastAPI
+
+from db_config import get_db
 from routers import note, auth, module, record
 import uvicorn
 
@@ -12,7 +14,8 @@ app.include_router(record.router)
 
 @app.get("/")
 async def root():
-    return {"message": "Server is running..."}
+    db=get_db()
+    return {"message": db.list_collection_names()}
 
 
 if __name__ == "__main__":
