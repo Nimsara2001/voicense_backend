@@ -16,4 +16,37 @@ async def root():
 
 
 if __name__ == "__main__":
-    uvicorn.run("main:app", host="0.0.0.0", port=80, reload=True)
+    uvicorn.run("main:app", host="localhost", port=8000, reload=True)
+
+
+# User
+#    -userId
+#    -userType
+#    -firstName
+#    -lastName
+#    -username
+#    -password
+#
+# transcription
+#    -transcriptionId
+#    -content
+#    -generatedDate
+#
+# lectureNote
+#    -noteId
+#    -topic
+#    -noteViewText (for note view card)
+#    -content (as a markdown format)
+#    -createdDate
+#    -lastAccessDate
+#    -transcriptionId
+#    -moduleId
+#
+# Module
+#    -moduleId
+#    -title
+#    -createdDate
+#
+# Prompt
+#    -promptId
+#    -prompt
