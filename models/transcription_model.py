@@ -1,15 +1,11 @@
 from typing import Optional
-from pydantic import BaseModel, EmailStr, Field
+from pydantic import BaseModel, Field
 
-# transcription
-#    -transcriptionId
-#    -content
-#    -generatedDate
 
 class UserSchema(BaseModel):
     transcription_id: str = Field(...)
     content: str = Field(...)
-    generatedDate: str = Field(...)
+    generated_date: str = Field(...)
 
     class Config:
         schema_extra = {
