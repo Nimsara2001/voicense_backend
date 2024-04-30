@@ -2,7 +2,7 @@ from typing import Optional
 from pydantic import BaseModel, Field
 
 
-class NoteSchema(BaseModel):
+class ModuleSchema(BaseModel):
     module_id: str = Field(...)
     title: str = Field(...)
     created_date: str = Field(...)
