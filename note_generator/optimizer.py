@@ -2,7 +2,6 @@ from note_generator.read_file import input_chunks
 from note_generator.prompts import create_cohesive_prompt
 from note_generator.chains import chain1, chain2
 
-
 def optimize_note(content_topic):
     previous_answer = ""
     complete_response = ""
@@ -23,6 +22,10 @@ def optimize_note(content_topic):
 
     final_answer = chain2.invoke({"domain": complete_response})
 
+
+
     # with open('final.txt', 'w') as f:
     #     f.write(final_answer)
     return final_answer
+
+
