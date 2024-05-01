@@ -18,7 +18,7 @@ def optimize_note(content_topic):
         k=k+1
         previous_answer = response
 
-    print(complete_response)
+    # print(complete_response)
 
     final_answer = chain2.invoke({"domain": complete_response})
 
