@@ -9,6 +9,6 @@ def get_db():
     try:
         client.server_info()
         print("Database is connected")
-        return client.voicense_db
+        return client.get_database("voicense_db")
     except Exception as e:
         print("Could not connect to the database. Error:", e)
