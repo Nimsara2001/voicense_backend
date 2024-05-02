@@ -13,7 +13,7 @@ async def get_all_modules(user_id: str):
 
 
 @router.get("/titles")
-async def get_all_modules(user_id: str):
+async def get_all_modules_titles(user_id: str):
     modules = get_all_modules_titles_func(user_id)
     return {"message": modules}
 
