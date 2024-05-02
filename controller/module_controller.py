@@ -123,6 +123,36 @@ def get_all_modules_titles_func(user_id: str):
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
+
+def get_other_module_notes_func(module_id:str):
+    try:
+        # Search by module_id using a filter with exact match
+        find_results = notes_collection.find({"module_id": module_id})
+
+        # Get the count of matching documents
+        num_notes = notes_collection.count_documents({"module_id": module_id})
+
+        # Raise an exception if no notes found
+        if num_notes == 0:
+            raise HTTPException(status_code=404, detail="No notes found for the specified module_id")
+
+        # Initialize an empty list to store selected characteristics
+        selected_characteristics = []
+
+        # Extract desired fields from each document
+        for note in find_results:
+            selected_fields = {
+                "title": note.get("title"),
+                "created_date": note.get("created_date"),
+                "description": note.get("description")
+            }
+            selected_characteristics.append(selected_fields)
+
+        return selected_characteristics
+
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
 # @app.get("/get_mod_id")
 # async def get_module(module_name: str):
 #     module = modules_collection.find_one({'module_name': module_name})

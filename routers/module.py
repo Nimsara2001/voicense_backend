@@ -1,5 +1,5 @@
 from fastapi import APIRouter
-from controller.module_controller import get_all_modules_titles_func, search_module_func, trash_module_func,get_all_modules_func,get_all_notes_func
+from controller.module_controller import get_all_modules_titles_func, search_module_func, trash_module_func,get_all_modules_func,get_all_notes_func,get_other_module_notes_func
 
 router = APIRouter(
     prefix="/module",
@@ -49,8 +49,9 @@ async def view_module_notes(module_id: str):
 
 
 @router.get("/other/notes")
-async def view_other_module_notes():
-    return {"message": "Other module notes"}
+async def view_other_module_notes(module_id: str):
+    other_notes=get_other_module_notes_func(module_id)
+    return {"message":other_notes}#assuming VCSM0000 is a other module
 
 
 @router.post("/add")
