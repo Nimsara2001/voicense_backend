@@ -1,4 +1,7 @@
+from bson import ObjectId
 from fastapi import APIRouter
+
+from db_config import get_db
 
 router = APIRouter(
     prefix="/note",
@@ -7,7 +10,12 @@ router = APIRouter(
 
 @router.get("/recent")
 async def recent_notes():
-    return {"message": "Recent notes"}
+    # overrite on the markdown_view file
+    db = get_db()
+    note = db["testnote"].find_one({"_id":ObjectId('6632988b3cb9a65b5fb9af39')})
+    with open('resources/markdown_view.md', 'w',encoding='utf-8') as f:
+        f.write(note["note"])
+    return {note["note"]}
 
 
 @router.post("/search")
