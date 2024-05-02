@@ -3,6 +3,7 @@ from controller.module_controller import get_all_modules_titles_func, search_mod
 
 router = APIRouter(
     prefix="/module",
+    tags=["module"],
 )
 
 

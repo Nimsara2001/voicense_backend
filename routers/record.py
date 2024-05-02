@@ -3,6 +3,7 @@ from note_generator.transcription_generator import get_transcription
 
 router = APIRouter(
     prefix="/record",
+    tags=["record"],
 )
 
 

@@ -79,9 +79,9 @@ def get_all_notes_func(module_id: str):
         # Extract desired fields from each document
         for note in find_results:
             selected_fields = {
-                note.get("title"),
-                note.get("created_date"),
-                note.get("description")
+                "title":note.get("title"),
+                "created_date":note.get("created_date"),
+                "description":note.get("description")
             }
             selected_characteristics.append(selected_fields)
 
@@ -109,8 +109,8 @@ def get_all_modules_titles_func(user_id: str):
         # Extract desired fields from each document
         for module in find_results:
             selected_fields = {
-                module.get("module_id"),
-                module.get("title"),
+                "module_id":module.get("module_id"),
+                "title":module.get("title"),
             }
             selected_characteristics.append(selected_fields)
 
