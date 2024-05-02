@@ -13,7 +13,7 @@ app.include_router(record.router)
 
 @app.get("/")
 async def root():
-    db=get_db()
+    db = get_db()
     return {"message": db.list_collection_names()}
 
 
