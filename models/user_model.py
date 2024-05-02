@@ -2,13 +2,13 @@ from typing import Optional
 from pydantic import BaseModel, Field
 
 
-class UserSchema(BaseModel):
+class User(BaseModel):
     user_id: str = Field(...)
     user_type: str = Field(...)
     first_name: str = Field(...)
     last_name: str = Field(...)
     username: str = Field(...)
-    password: str = Field(...)
+    hashed_password: str = Field(...)
 
     class Config:
         schema_extra = {
@@ -21,8 +21,6 @@ class UserSchema(BaseModel):
                 "password": "1234",
             }
         }
-
-
 class UpdateUserModel(BaseModel):
     user_id: Optional[str]
     user_type: Optional[str]
