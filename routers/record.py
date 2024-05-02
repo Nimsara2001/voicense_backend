@@ -1,4 +1,5 @@
 from fastapi import APIRouter
+
 from note_generator.transcription_generator import get_transcription
 
 router = APIRouter(
@@ -8,4 +9,5 @@ router = APIRouter(
 
 @router.get("/upload")
 async def upload_record():
-    return {get_transcription()}
+    get_transcription()
+    return {"message": "Transcription complete and note optimized"}

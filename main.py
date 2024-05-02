@@ -6,10 +6,10 @@ import uvicorn
 
 app = FastAPI()
 
-app.include_router(auth.router)
-app.include_router(note.router)
-app.include_router(module.router)
-app.include_router(record.router)
+app.include_router(auth.router, tags=["Auth"])
+app.include_router(note.router, tags=["Note"])
+app.include_router(module.router, tags=["Module"])
+app.include_router(record.router, tags=["Record"])
 
 
 @app.get("/")
