@@ -3,7 +3,7 @@ from pydantic import BaseModel, Field
 
 
 class User(BaseModel):
-    user_id: str = Field(...)
+    # user_id: str = Field(...)
     user_type: str = Field(...)
     first_name: str = Field(...)
     last_name: str = Field(...)
@@ -21,6 +21,21 @@ class User(BaseModel):
                 "password": "1234",
             }
         }
+
+
+class TokenRequest(BaseModel):
+    username: str
+    password: str
+
+
+class SignupRequest(BaseModel):
+    username: str
+    password: str
+    first_name: str
+    last_name: str
+    user_type: str
+
+
 class UpdateUserModel(BaseModel):
     user_id: Optional[str]
     user_type: Optional[str]

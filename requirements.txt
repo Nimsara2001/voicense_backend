@@ -13,4 +13,5 @@ langchain-google-genai~=1.0.3
 openai-whisper
 torch~=2.3.0
 tiktoken~=0.6.0
+bcrypt~=4.1.2
 
