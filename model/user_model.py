@@ -21,12 +21,9 @@ class User(BaseModel):
                 "password": "1234",
             }
         }
-
-
 class TokenRequest(BaseModel):
     username: str
     password: str
-
 
 class SignupRequest(BaseModel):
     username: str
@@ -67,3 +64,4 @@ class UpdateUserModel(BaseModel):
 #
 # def ErrorResponseModel(error, code, message):
 #     return {"error": error, "code": code, "message": message}
+# hansaka branch
