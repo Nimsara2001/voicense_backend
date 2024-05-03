@@ -7,7 +7,6 @@ from typing import Dict, Optional
 from db_config import get_db
 from model.user_model import User
 
-
 # Password hashing
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 
@@ -31,8 +30,8 @@ home_screens = {
 
 # Define a dictionary to map user types to frontend URLs
 frontend_urls: Dict[str, str] = {
-    "lecturer": "https://your-app.com/lecturer",
-    "student": "https://your-app.com/student",
+    "lecturer": "https://your-app.com/lecturer_home",
+    "student": "https://your-app.com/student_home",
 }
 
 
@@ -96,3 +95,5 @@ async def get_current_user(token: str = Depends(oauth2_scheme)) -> User:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND, detail="User not found")
     return User(**user)
+
+# hansaka branch

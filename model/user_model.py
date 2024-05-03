@@ -1,7 +1,6 @@
 from typing import Optional
 from pydantic import BaseModel, Field
 
-
 class User(BaseModel):
     # user_id: str = Field(...)
     user_type: str = Field(...)
