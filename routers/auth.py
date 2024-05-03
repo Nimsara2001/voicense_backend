@@ -8,7 +8,6 @@ router = APIRouter(
     prefix="/auth",
 )
 
-
 # @router.post("/signup")
 # async def signup():
 #     return await {"message": "Signup page"}
@@ -60,8 +59,6 @@ async def read_users_me(current_user: User = Depends(get_current_user)):
     home_screen = home_screens[user_type]
     frontend_url = frontend_urls[user_type]
     return {"home_screen": home_screen, "frontend_url": frontend_url, "user": current_user}
-    # return current_user
-
 
 @router.post("/refresh-token")
 async def refresh_token(current_user: User = Depends(get_current_user)):
@@ -69,4 +66,5 @@ async def refresh_token(current_user: User = Depends(get_current_user)):
         data={"sub": current_user.username}
     )
     return {"access_token": access_token, "token_type": "bearer"}
-# mihin branch
+
+# hansaka branch
