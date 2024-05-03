@@ -1,14 +1,13 @@
 from typing import Optional
 from pydantic import BaseModel, Field
 
-
-class UserSchema(BaseModel):
-    user_id: str = Field(...)
+class User(BaseModel):
+    # user_id: str = Field(...)
     user_type: str = Field(...)
     first_name: str = Field(...)
     last_name: str = Field(...)
     username: str = Field(...)
-    password: str = Field(...)
+    hashed_password: str = Field(...)
 
     class Config:
         schema_extra = {
@@ -21,6 +20,16 @@ class UserSchema(BaseModel):
                 "password": "1234",
             }
         }
+class TokenRequest(BaseModel):
+    username: str
+    password: str
+
+class SignupRequest(BaseModel):
+    username: str
+    password: str
+    first_name: str
+    last_name: str
+    user_type: str
 
 
 class UpdateUserModel(BaseModel):
@@ -54,3 +63,4 @@ class UpdateUserModel(BaseModel):
 #
 # def ErrorResponseModel(error, code, message):
 #     return {"error": error, "code": code, "message": message}
+# hansaka branch

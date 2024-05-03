@@ -56,6 +56,7 @@ async def view_other_module_notes(module_id: str):
 
 @router.post("/add")
 async def add_module():
+    # for testing
     return {"message": "Add module"}
 
 

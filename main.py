@@ -1,5 +1,4 @@
 from fastapi import FastAPI
-
 from db_config import get_db
 from routers import note, auth, module, record
 import uvicorn
