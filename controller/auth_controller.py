@@ -5,7 +5,7 @@ from fastapi import Depends, HTTPException, status
 from datetime import datetime, timedelta
 from typing import Dict, Optional
 from db_config import get_db
-from model.user_model import User
+from model.user import User
 
 # Password hashing
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")

@@ -1,7 +1,7 @@
 from fastapi import APIRouter, Depends, HTTPException, status
 from fastapi.security import OAuth2PasswordRequestForm
 from controller.auth_controller import authenticate_user, create_access_token, create_refresh_token, create_user, get_current_user, home_screens, frontend_urls
-from model.user_model import SignupRequest, User
+from model.user import SignupRequest, User
 
 
 router = APIRouter(
