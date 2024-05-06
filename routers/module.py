@@ -1,5 +1,10 @@
 from fastapi import APIRouter
-from controller.module_controller import get_all_modules_titles_func, search_module_func, trash_module_func,get_all_modules_func,get_all_notes_func
+from controller.module_controller import (get_all_modules_titles_func,
+                                          search_module_func,
+                                          trash_module_func,
+                                          get_all_modules_func,
+                                          get_all_notes_func)
+
 
 router = APIRouter(
     prefix="/module",
