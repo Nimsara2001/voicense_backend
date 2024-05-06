@@ -19,10 +19,15 @@ ACCESS_TOKEN_EXPIRE_MINUTES = 30
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="auth/token")
 
 # MongoDB collection
-db = get_db()
-UserCollection = db["User"]
+UserCollection = None
 
-home_screens = Dict[str, str]
+
+async def get_user_collection():
+    global UserCollection
+    db = await get_db()
+    UserCollection = db["User"]
+
+
 home_screens = {
     "lecturer": "lecturer_home",
     "student": "student_home",
@@ -42,7 +47,8 @@ async def get_user(username: str):
 async def create_user(username: str, password: str, first_name: str, last_name: str, user_type: str):
     hashed_password = pwd_context.hash(password)
     user = {"username": username,
-            "hashed_password": hashed_password, "first_name": first_name, "last_name": last_name, "user_type": user_type}
+            "hashed_password": hashed_password, "first_name": first_name, "last_name": last_name,
+            "user_type": user_type}
     result = UserCollection.insert_one(user)
     return User(**user, id=str(result.inserted_id))
 
@@ -95,5 +101,3 @@ async def get_current_user(token: str = Depends(oauth2_scheme)) -> User:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND, detail="User not found")
     return User(**user)
-
-# hansaka branch

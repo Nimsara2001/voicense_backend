@@ -1,9 +1,9 @@
 from fastapi import FastAPI
-from db_config import get_db
 from routers import note, auth, module, record
 import uvicorn
+from db_config import get_db
 
-app = FastAPI()
+app = FastAPI(debug=True)
 
 app.include_router(auth.router, tags=["Auth"])
 app.include_router(note.router, tags=["Note"])
@@ -13,8 +13,8 @@ app.include_router(record.router, tags=["Record"])
 
 @app.get("/")
 async def root():
-    db = get_db()
-    return {"message": db.list_collection_names()}
+    db = await get_db()
+    return {"db collections": await db.list_collection_names()}
 
 
 if __name__ == "__main__":

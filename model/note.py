@@ -11,7 +11,7 @@ class Note(BaseModel):
     last_accessed: str
 
     class Config:
-        schema_extra = {
+        json_schema_extra = {
             "example": {
                 "note_id": "VCSN0001",
                 "title": "Python Programming",
