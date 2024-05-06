@@ -10,7 +10,7 @@ class Module(BaseModel):
     notes: Optional[list] = []
 
     class Config:
-        schema_extra = {
+        json_schema_extra = {
             "example": {
                 "module_id": "VCSM0001",
                 "title": "Python Core",

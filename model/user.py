@@ -12,7 +12,7 @@ class User(BaseModel):
     modules: Optional[list] = []
 
     class Config:
-        schema_extra = {
+        json_schema_extra = {
             "example": {
                 "user_id": "VCSS0001",
                 "user_type": "Student",
@@ -23,3 +23,16 @@ class User(BaseModel):
                 "modules": ["VCSM0001", "VCSM0002", "VCSM0003"]
             }
         }
+
+
+class TokenRequest(BaseModel):
+    username: str
+    password: str
+
+
+class SignupRequest(BaseModel):
+    username: str
+    password: str
+    first_name: str
+    last_name: str
+    user_type: str

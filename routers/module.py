@@ -1,10 +1,5 @@
 from fastapi import APIRouter
-from controller.module_controller import (get_all_modules_titles_func,
-                                          search_module_func,
-                                          trash_module_func,
-                                          get_all_modules_func,
-                                          get_all_notes_func)
-
+import controller.module_controller as controller
 
 router = APIRouter(
     prefix="/module",
@@ -13,13 +8,13 @@ router = APIRouter(
 
 @router.get("/all")
 async def get_all_modules(user_id: str):
-    modules = get_all_modules_func(user_id)
+    modules = controller.get_all_modules_func(user_id)
     return {"message": modules}
 
 
 @router.get("/titles")
 async def get_all_modules_titles(user_id: str):
-    modules = get_all_modules_titles_func(user_id)
+    modules = controller.get_all_modules_titles_func(user_id)
     return {"message": modules}
 
 
@@ -28,7 +23,7 @@ async def get_all_modules_titles(user_id: str):
 
 @router.post("/search")
 async def search_module(search_text):
-    search_results = search_module_func(search_text)
+    search_results = controller.search_module_func(search_text)
     return {"message": search_results["message"]}  # Access "message" key directly
 
 
@@ -41,7 +36,7 @@ async def share_module(module_id: int):
 
 @router.delete("/trash/{module_id}")
 async def trash_module(module_id: str):
-    trash_module_func(module_id)
+    controller.trash_module_func(module_id)
     return {"message": f"Trash module {module_id}"}
 
 
@@ -49,14 +44,14 @@ async def trash_module(module_id: str):
 
 @router.post("/{module_id}/notes")
 async def view_module_notes(module_id: str):
-    notes = get_all_notes_func(module_id)
+    notes = controller.get_all_notes_func(module_id)
     return {"message": notes}
 
 
 @router.get("/other/notes")
 async def view_other_module_notes(module_id: str):
-    other_notes=get_other_module_notes_func(module_id)
-    return {"message":other_notes}#assuming VCSM0000 is a other module
+    other_notes = controller.get_other_module_notes_func(module_id)
+    return {"message": other_notes}
 
 
 @router.post("/add")
