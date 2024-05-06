@@ -5,7 +5,6 @@ uri = "mongodb+srv://admin:1234@cluster0.4ahsat4.mongodb.net/"
 
 client = MongoClient(uri, server_api=ServerApi('1'))
 
-
 def get_db():
     try:
         client.server_info()

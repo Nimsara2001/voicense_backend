@@ -18,7 +18,7 @@ async def get_all_modules(user_id: str):
 
 
 @router.get("/titles")
-async def get_all_modules(user_id: str):
+async def get_all_modules_titles(user_id: str):
     modules = get_all_modules_titles_func(user_id)
     return {"message": modules}
 
@@ -54,12 +54,14 @@ async def view_module_notes(module_id: str):
 
 
 @router.get("/other/notes")
-async def view_other_module_notes():
-    return {"message": "Other module notes"}
+async def view_other_module_notes(module_id: str):
+    other_notes=get_other_module_notes_func(module_id)
+    return {"message":other_notes}#assuming VCSM0000 is a other module
 
 
 @router.post("/add")
 async def add_module():
+    # for testing
     return {"message": "Add module"}
 
 
