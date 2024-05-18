@@ -1,4 +1,5 @@
 from fastapi import APIRouter
+from fastapi.encoders import jsonable_encoder
 import controller.module_controller as controller
 
 router = APIRouter(
@@ -7,15 +8,16 @@ router = APIRouter(
 
 
 @router.get("/all")
-async def get_all_modules(user_id: str):
-    modules = controller.get_all_modules_func(user_id)
-    return {"message": modules}
+async def get_all_modules(user_object_id: str):
+    modules = await controller.get_all_modules_func(user_object_id)
+    return modules
+
 
 
 @router.get("/titles")
-async def get_all_modules_titles(user_id: str):
-    modules = controller.get_all_modules_titles_func(user_id)
-    return {"message": modules}
+async def get_all_modules_titles(user_object_id: str):
+    modules = await controller.get_all_modules_titles_func(user_object_id)
+    return modules
 
 
 # done
@@ -43,9 +45,9 @@ async def trash_module(module_id: str):
 # done
 
 @router.post("/{module_id}/notes")
-async def view_module_notes(module_id: str):
-    notes = controller.get_all_notes_func(module_id)
-    return {"message": notes}
+async def view_module_notes(user_object_id: str, relevant_module_id: str):
+    notes = await controller.get_all_notes_func(user_object_id, relevant_module_id)
+    return notes
 
 
 @router.get("/other/notes")
