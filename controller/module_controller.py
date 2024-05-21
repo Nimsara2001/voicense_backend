@@ -29,10 +29,13 @@ async def get_all_modules_func(user_object_id: str):
         user = await users_collection.find_one({"_id": user_id})
         if user:
             # Convert ObjectIds to strings
-            data_retrieved = []
+            modules_data = []
             for module_id in user["modules"]:
-                data_retrieved.append(str(module_id))
-            return data_retrieved
+                module = await modules_collection.find_one({"_id": module_id})
+                if module:
+                    module_data = jsonable_encoder(module)
+                    modules_data.append(module_data)
+            return modules_data
         else:
             print("no user is found")
             return None
@@ -107,6 +110,7 @@ async def get_all_notes_func(user_object_id: str, relevant_module_id: str):
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
+
 # TODO
 def search_module_func(text: str):
     try:
@@ -135,6 +139,7 @@ def trash_module_func(module_object_id: str):
             return {"message": "Module not found"}
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
+
 
 # TODO
 def get_other_module_notes_func(module_id: str):
@@ -169,3 +174,4 @@ def get_other_module_notes_func(module_id: str):
 # @app.get("/get_mod_id")
 # async def get_module(module_name: str):
 #     module = modules_collection.find_one({'module_name': module_name})
+

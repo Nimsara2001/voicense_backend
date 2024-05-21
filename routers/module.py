@@ -13,7 +13,6 @@ async def get_all_modules(user_object_id: str):
     return modules
 
 
-
 @router.get("/titles")
 async def get_all_modules_titles(user_object_id: str):
     modules = await controller.get_all_modules_titles_func(user_object_id)

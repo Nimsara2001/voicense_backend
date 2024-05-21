@@ -1,9 +1,10 @@
 from typing import Optional
+from bson import ObjectId
 from pydantic import BaseModel, Field
 
 
 class Note(BaseModel):
-    note_id: str = Field(...)
+    id: Optional[str] = Field(default=None, alias="_id")
     title: str = Field(...)
     description: str = Field(...)  # show in the note view card
     content: str = Field(...)
@@ -13,7 +14,7 @@ class Note(BaseModel):
     class Config:
         json_schema_extra = {
             "example": {
-                "note_id": "VCSN0001",
+                "_id": "60d5ec88b35866cc8fe16e6e",
                 "title": "Python Programming",
                 "description": "Python is a programming language that lets you work quickly and integrate systems more effectively.",
                 "content": """
@@ -103,3 +104,4 @@ class Note(BaseModel):
                 "last_accessed": "2021-06-01",
             }
         }
+
