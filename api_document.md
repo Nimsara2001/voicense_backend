@@ -3,12 +3,6 @@
 ## Introduction
 This document outlines the endpoints and functionalities of the Voicense API.
 
-## IDs of Each Entity
-- **User**: `VCSS0001` or `VCSL0002`
-- **Note**: `VCSN0003`
-- **Module**: `VCSM0004`
-- **Transcription**: `VCST0005`
-
 ## Endpoints
 
 ### Root
