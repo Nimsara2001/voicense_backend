@@ -1,14 +1,17 @@
-from pymongo.mongo_client import MongoClient
-from pymongo.server_api import ServerApi
+from motor.motor_asyncio import AsyncIOMotorClient
 
 uri = "mongodb+srv://admin:1234@cluster0.4ahsat4.mongodb.net/"
-client = MongoClient(uri, server_api=ServerApi('1'))
+client = AsyncIOMotorClient(uri)
 
 
-def get_db():
-    try:
-        client.server_info()
-        print("Database is connected")
-        return client.voicense_db
-    except Exception as e:
-        print("Could not connect to the database. Error:", e)
+async def get_db():
+    global client
+    if client is None:
+        try:
+            client = AsyncIOMotorClient(uri)
+            await client.server_info()
+            print("Database is connected successfully.")
+        except Exception as e:
+            print("Could not connect to the database. Error:", e)
+            raise
+    return client.voicense_db
