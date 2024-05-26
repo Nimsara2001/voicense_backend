@@ -1,13 +1,16 @@
 from datetime import datetime
+from typing import Dict
+import time
+from jose import jwt
 from passlib.context import CryptContext
 from fastapi import HTTPException
 from db_config import get_db
 from model.module import Module
-from model.user import User, get_user_schema
+from model.user import User, get_user_schema, LoginUser
 
-SECRET_KEY = "Ks9Tz2Ld7Xv8Yw5Qr6Uj3Nb1Ec0Fm4Oa"
-ALGORITHM = "HS256"
-ACCESS_TOKEN_EXPIRE_MINUTES = 30
+JWT_SECRET_KEY = "Ks9Tz2Ld7Xv8Yw5Qr6Uj3Nb1Ec0Fm4Oa"
+JWT_ALGORITHM = "HS256"
+JWT_ACCESS_TOKEN_EXPIRE = 1
 
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 
@@ -19,12 +22,14 @@ async def set_collection():
     global user_collection, modules_collection
     db = await get_db()
 
+    if db is None:
+        raise Exception("Failed to get database connection")
+
     if user_collection is None:
         user_collection = db["User"]
 
     if modules_collection is None:
         modules_collection = db["Module"]
-
 
 async def exist_user(username: str) -> bool:
     await set_collection()
@@ -49,7 +54,7 @@ async def signup_func(user: User):
     await set_collection()
     user.password = get_password_hash(user.password)
     if await exist_user(user.username):
-        raise HTTPException(status_code=400, detail="Username already exists")
+        return "exist_user"
     else:
         other_module_id = await init_other_module(user.username)
         user.modules.append(other_module_id)
@@ -69,10 +74,53 @@ def verify_password(plain_password, hashed_password):
 def get_password_hash(password):
     return pwd_context.hash(password)
 
-# def authenticate_user(fake_db, username: str, password: str):
-#     user = get_user(fake_db, username)
-#     if not user:
-#         return False
-#     if not verify_password(password, user.hashed_password):
-#         return False
-#     return user
+
+async def authenticate_user(login_user: LoginUser):
+    try:
+        await set_collection()
+        user = await user_collection.find_one({"username": login_user.username})
+        if user is None:
+            return "incorrect_username"
+        else:
+            if not verify_password(login_user.password, user["password"]):
+                return "incorrect_password"
+            return get_user_schema(user)
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+# ================================= JWT ==================================================
+
+def token_response(token: str):
+    return {
+        "access_token": token
+    }
+
+
+def signJWT(user_id: str) -> Dict[str, str]:
+    payload = {
+        "user_id": user_id,
+        "expires": time.time() + JWT_ACCESS_TOKEN_EXPIRE * 60
+    }
+    token = jwt.encode(payload, JWT_SECRET_KEY, algorithm=JWT_ALGORITHM)
+
+    return token_response(token)
+
+
+def decodeJWT(token: str) -> dict:
+    try:
+        decoded_token = jwt.decode(token, JWT_SECRET_KEY, algorithms=[JWT_ALGORITHM])
+        return decoded_token if decoded_token["expires"] >= time.time() else None
+    except:
+        return {}
+
+
+def verify_jwt(token: str) -> bool:
+    is_token_valid: bool = False
+    try:
+        payload = decodeJWT(token)
+    except:
+        payload = None
+    if payload:
+        is_token_valid = True
+    return is_token_valid

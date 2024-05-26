@@ -24,6 +24,19 @@ class User(BaseModel):
         }
 
 
+class LoginUser(BaseModel):
+    username: str = Field(...)
+    password: str = Field(...)
+
+    class Config:
+        json_schema_extra = {
+            "example": {
+                "username": "mihin",
+                "password": "mihin123"
+            }
+        }
+
+
 def get_user_schema(user):
     return {
         "id": str(user["_id"]),
