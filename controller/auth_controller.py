@@ -6,6 +6,7 @@ from datetime import datetime, timedelta
 from typing import Dict, Optional
 from db_config import get_db
 from model.user import User
+from motor.motor_asyncio import AsyncIOMotorClient
 
 # Password hashing
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
@@ -19,14 +20,12 @@ ACCESS_TOKEN_EXPIRE_MINUTES = 30
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="auth/token")
 
 # MongoDB collection
-UserCollection = None
-
+user_collection = None
 
 async def get_user_collection():
-    global UserCollection
+    global user_collection
     db = await get_db()
-    UserCollection = db["User"]
-
+    user_collection = db["User"]
 
 home_screens = {
     "lecturer": "lecturer_home",
@@ -41,15 +40,17 @@ frontend_urls: Dict[str, str] = {
 
 
 async def get_user(username: str):
-    return UserCollection.find_one({"username": username})
+    return await user_collection.find_one({"username": username})
 
 
 async def create_user(username: str, password: str, first_name: str, last_name: str, user_type: str):
     hashed_password = pwd_context.hash(password)
-    user = {"username": username,
-            "hashed_password": hashed_password, "first_name": first_name, "last_name": last_name,
-            "user_type": user_type}
-    result = UserCollection.insert_one(user)
+    user = {"username": username, "hashed_password": hashed_password,
+            "first_name": first_name,
+            "last_name": last_name,
+            "user_type": user_type
+            }
+    result = await user_collection.insert_one(user)
     return User(**user, id=str(result.inserted_id))
 
 

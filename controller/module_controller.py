@@ -4,7 +4,6 @@ from fastapi import HTTPException
 modules_collection = None
 notes_collection = None
 
-
 async def get_collection():
     global modules_collection
     global notes_collection

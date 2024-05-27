@@ -16,6 +16,7 @@ router = APIRouter(
 # async def login():
 #     return {"message": "Login page"}
 
+
 @router.post("/token")
 async def login_for_access_token(form_data: OAuth2PasswordRequestForm = Depends()):
     user = await authenticate_user(form_data.username, form_data.password)
@@ -42,7 +43,7 @@ async def signup(signup_request: SignupRequest):
         signup_request.first_name,
         signup_request.last_name,
         signup_request.user_type
-    )
+    )   
 
 
 @router.get("/me")
@@ -67,4 +68,4 @@ async def refresh_token(current_user: User = Depends(get_current_user)):
     )
     return {"access_token": access_token, "token_type": "bearer"}
 
-#mihin branch
+# hansaka branch
