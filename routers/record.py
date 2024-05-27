@@ -1,7 +1,5 @@
 from typing import Annotated
-
 from fastapi import APIRouter, UploadFile, File, Body
-
 import controller.transcription_controller as controller
 
 router = APIRouter(
@@ -13,7 +11,6 @@ router = APIRouter(
 async def upload_record(file: Annotated[UploadFile, File],
                         user_id: Annotated[str, Body],
                         module_id: Annotated[str, Body]):
-
     res = await controller.save_audio(file)
 
     if res["message"] == "failed":
@@ -25,5 +22,5 @@ async def upload_record(file: Annotated[UploadFile, File],
             "details":
                 {"user_id": user_id,
                  "module_id": module_id},
-            "transcription": transcription
+            "transcription": transcription,
             }

@@ -1,5 +1,5 @@
 import os
-from note_generator.prompts import promptM1,promptR1,promptTE
+from note_generator.prompts import promptM1, promptR1, promptTE
 from langchain_google_genai import ChatGoogleGenerativeAI
 from langchain.schema.output_parser import StrOutputParser
 
