@@ -25,3 +25,10 @@ def get_input_chunks():
     except Exception as e:
         print(f"An error occurred: {e}")
 
+def get_file_content(file_path):
+    with open(file_path, 'r') as file:
+        file_content = file.read()
+        return file_content
+
+def get_file_path():
+    return file_path
