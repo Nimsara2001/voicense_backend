@@ -20,5 +20,5 @@ promptR1 = PromptTemplate(
 
 promptTE = PromptTemplate(
     input_variables=['transcript'],
-    template="This trancription is a raw transcription is a raw transcription of some particular topic {transcript}. based on the transcription, guess the broader topic of the discussion and return only that topic name"
+    template="This trancription is a raw transcription of some particular topic {transcript}. based on the transcription, guess the broader topic of the discussion and return only that topic name"
 )

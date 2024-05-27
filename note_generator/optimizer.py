@@ -1,16 +1,15 @@
-from db_config import get_db
 from note_generator.prompts import create_cohesive_prompt
 from note_generator.chains import chain1, chain2, chain0
-from note_generator.read_file import get_input_chunks, get_file_content, get_file_path
+from note_generator.read_file import get_input_chunks
 
 
-def optimize_note(content_topic):
+def optimize_note(transcription):
     previous_answer = ""
     complete_response = ""
-    overall_topic = content_topic
+    overall_topic = "Management"
     k = 1
 
-    input_chunks = get_input_chunks()
+    input_chunks = get_input_chunks(transcription)
 
     for chunk in input_chunks:
         cohesive_prompt = create_cohesive_prompt(chunk, overall_topic)
@@ -26,16 +25,9 @@ def optimize_note(content_topic):
 
     final_answer = chain2.invoke({"domain": complete_response})
 
-    # Save the note to the database
-    db = get_db()
-    db.testnote.insert_one({"note": final_answer})
-
     return final_answer
 
 
-def get_overall_topic(file_path=get_file_path()):
-    print("getting the topic")
-    file_content = get_file_content(file_path)
-    topic = chain0.invoke({"transcript": file_content})
-    print(topic)
+def get_overall_topic(transcription):
+    topic = chain0.invoke({"transcript": transcription})
     return topic
