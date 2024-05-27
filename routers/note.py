@@ -1,12 +1,14 @@
 from fastapi import APIRouter
 
+from model.note import Note
+
 router = APIRouter(
     prefix="/note",
 )
 
 
 @router.get("/recent")
-async def recent_notes():
+async def recent_notes(note:Note):
     return {"message": "Recent notes"}
 
 
