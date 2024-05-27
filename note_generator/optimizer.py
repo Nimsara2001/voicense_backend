@@ -1,7 +1,7 @@
 from db_config import get_db
 from note_generator.prompts import create_cohesive_prompt
-from note_generator.chains import chain1, chain2
-from note_generator.read_file import get_input_chunks
+from note_generator.chains import chain1, chain2, chain0
+from note_generator.read_file import get_input_chunks, get_file_content, get_file_path
 
 
 def optimize_note(content_topic):
@@ -31,3 +31,11 @@ def optimize_note(content_topic):
     db.testnote.insert_one({"note": final_answer})
 
     return final_answer
+
+
+def get_overall_topic(file_path=get_file_path()):
+    print("getting the topic")
+    file_content = get_file_content(file_path)
+    topic = chain0.invoke({"transcript": file_content})
+    print(topic)
+    return topic

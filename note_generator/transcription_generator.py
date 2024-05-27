@@ -1,6 +1,6 @@
 import whisper
 
-from note_generator.optimizer import optimize_note
+from note_generator.optimizer import optimize_note,get_overall_topic
 
 model = whisper.load_model("base.en")
 
@@ -11,5 +11,6 @@ def get_transcription():
     with open('resources/transcription.txt', 'w') as f:
         f.write(result["text"])
     print("Transcription complete")
-    optimize_note("Python FastAPI")
+    content_topic = get_overall_topic()
+    optimize_note(content_topic)
     print("Note optimized")
