@@ -15,6 +15,7 @@ app.include_router(note.router, tags=["Note"])
 app.include_router(module.router, tags=["Module"])
 app.include_router(record.router, tags=["Record"])
 
+
 @app.get("/")
 async def root():
     db = await get_db()
