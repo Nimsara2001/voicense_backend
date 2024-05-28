@@ -4,6 +4,7 @@ import controller.transcription_controller as controller
 
 router = APIRouter(
     prefix="/record",
+    tags=["record"],
 )
 
 

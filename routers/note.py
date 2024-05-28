@@ -9,7 +9,7 @@ from controller.note_controller import (delete_note_by_id_permanently,
 
 router = APIRouter(
     prefix="/note",
-    tags=["note"]
+    tags=["note"],
 )
 
 

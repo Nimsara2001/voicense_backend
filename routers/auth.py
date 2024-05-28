@@ -4,6 +4,7 @@ import controller.auth_controller as controller
 
 router = APIRouter(
     prefix="/auth",
+    tags=["auth"],
 )
 
 
