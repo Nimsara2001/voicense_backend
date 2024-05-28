@@ -2,5 +2,4 @@
 __pycache__/
 .venv/
 venv/
-resources/array_jenny.mp3
-resources/marketing.mp3
+resources/audio/

@@ -1,4 +1,5 @@
 from fastapi import APIRouter
+from note_generator.optimizer import optimize_note
 
 router = APIRouter(
     prefix="/note",
@@ -7,7 +8,10 @@ router = APIRouter(
 
 @router.get("/recent")
 async def recent_notes():
-    return {"message": "Recent notes"}
+    with open('resources/transcription2.txt', 'r') as file:
+        transcription = file.read()
+    note = optimize_note(transcription)
+    return {"note": note}
 
 
 @router.post("/search")
