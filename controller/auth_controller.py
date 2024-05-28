@@ -1,104 +1,129 @@
-from fastapi.security import OAuth2PasswordBearer
+from datetime import datetime
+from typing import Dict
+import time
+from jose import jwt
 from passlib.context import CryptContext
-from jose import JWTError, jwt
-from fastapi import Depends, HTTPException, status
-from datetime import datetime, timedelta
-from typing import Dict, Optional
+from fastapi import HTTPException
 from db_config import get_db
-from model.user import User
-from motor.motor_asyncio import AsyncIOMotorClient
+from model.module import Module
+from model.user import User, get_user_schema, LoginUser
 
-# Password hashing
+JWT_SECRET_KEY = "Ks9Tz2Ld7Xv8Yw5Qr6Uj3Nb1Ec0Fm4Oa"
+JWT_ALGORITHM = "HS256"
+JWT_ACCESS_TOKEN_EXPIRE = 1
+
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 
-# JWT settings
-SECRET_KEY = "Ks9Tz2Ld7Xv8Yw5Qr6Uj3Nb1Ec0Fm4Oa"
-ALGORITHM = "HS256"
-ACCESS_TOKEN_EXPIRE_MINUTES = 30
-
-# security
-oauth2_scheme = OAuth2PasswordBearer(tokenUrl="auth/token")
-
-# MongoDB collection
 user_collection = None
+modules_collection = None
 
-async def get_user_collection():
-    global user_collection
+
+async def set_collection():
+    global user_collection, modules_collection
     db = await get_db()
-    user_collection = db["User"]
 
-home_screens = {
-    "lecturer": "lecturer_home",
-    "student": "student_home",
-}
+    if db is None:
+        raise Exception("Failed to get database connection")
 
-# Define a dictionary to map user types to frontend URLs
-frontend_urls: Dict[str, str] = {
-    "lecturer": "https://your-app.com/lecturer_home",
-    "student": "https://your-app.com/student_home",
-}
+    if user_collection is None:
+        user_collection = db["User"]
+
+    if modules_collection is None:
+        modules_collection = db["Module"]
 
 
-async def get_user(username: str):
-    return await user_collection.find_one({"username": username})
+async def exist_user(username: str) -> bool:
+    await set_collection()
+    user = await user_collection.find_one({"username": username})
+    return user is not None
 
 
-async def create_user(username: str, password: str, first_name: str, last_name: str, user_type: str):
-    hashed_password = pwd_context.hash(password)
-    user = {"username": username, "hashed_password": hashed_password,
-            "first_name": first_name,
-            "last_name": last_name,
-            "user_type": user_type
-            }
-    result = await user_collection.insert_one(user)
-    return User(**user, id=str(result.inserted_id))
+async def init_other_module(username: str):
+    await set_collection()
+    current_date = datetime.now().date()
+    current_timestamp = datetime.now()
+    new_module = Module(
+        title=f"{username}_other",
+        created_date=str(current_date),
+        last_accessed=str(current_timestamp),
+    )
+    result = await modules_collection.insert_one(new_module.dict())
+    return result.inserted_id
 
 
-async def authenticate_user(username: str, password: str):
-    user = await get_user(username)
-    if not user:
-        return False
-    if not pwd_context.verify(password, user["hashed_password"]):
-        return False
-    return User(**user)
-
-
-def create_access_token(data: dict, expires_delta: Optional[timedelta] = None):
-    to_encode = data.copy()
-    if expires_delta:
-        expire = datetime.utcnow() + expires_delta
+async def signup_func(user: User):
+    await set_collection()
+    user.password = get_password_hash(user.password)
+    if await exist_user(user.username):
+        return "exist_user"
     else:
-        # Shorter expiration time for access tokens
-        expire = datetime.utcnow() + timedelta(minutes=2)
-    to_encode.update({"exp": expire})
-    encoded_jwt = jwt.encode(to_encode, SECRET_KEY, algorithm=ALGORITHM)
-    return encoded_jwt
+        other_module_id = await init_other_module(user.username)
+        user.modules.append(other_module_id)
+        try:
+            result = await user_collection.insert_one(user.dict())
+            if result.inserted_id is None:
+                raise HTTPException(
+                    status_code=500, detail="User insertion failed")
+            return str(result.inserted_id)
+        except Exception as e:
+            raise HTTPException(status_code=500, detail=str(e))
 
 
-def create_refresh_token(data: dict):
-    to_encode = data.copy()
-    # Longer expiration time for refresh tokens
-    expire = datetime.utcnow() + timedelta(days=32)
-    to_encode.update({"exp": expire})
-    encoded_jwt = jwt.encode(to_encode, SECRET_KEY, algorithm=ALGORITHM)
-    return encoded_jwt
+def verify_password(plain_password, hashed_password):
+    return pwd_context.verify(plain_password, hashed_password)
 
 
-async def get_current_user(token: str = Depends(oauth2_scheme)) -> User:
+def get_password_hash(password):
+    return pwd_context.hash(password)
+
+
+async def authenticate_user(login_user: LoginUser):
     try:
-        # Decode the token using the secret key and algorithm
-        payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
-        username = payload.get("sub")
-        if username is None:
-            raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED,
-                                detail="Could not validate credentials")
-    except JWTError:
-        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED,
-                            detail="Could not validate credentials")
+        await set_collection()
+        user = await user_collection.find_one({"username": login_user.username})
+        if user is None:
+            return "incorrect_username"
+        else:
+            if not verify_password(login_user.password, user["password"]):
+                return "incorrect_password"
+            return get_user_schema(user)
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
 
-    # Fetch the user from the database
-    user = await get_user(username)
-    if user is None:
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND, detail="User not found")
-    return User(**user)
+
+# ================================= JWT ==================================================
+
+def token_response(token: str):
+    return {
+        "access_token": token
+    }
+
+
+def signJWT(user_id: str) -> Dict[str, str]:
+    payload = {
+        "user_id": user_id,
+        "expires": time.time() + JWT_ACCESS_TOKEN_EXPIRE * 60
+    }
+    token = jwt.encode(payload, JWT_SECRET_KEY, algorithm=JWT_ALGORITHM)
+
+    return token_response(token)
+
+
+def decodeJWT(token: str) -> dict:
+    try:
+        decoded_token = jwt.decode(
+            token, JWT_SECRET_KEY, algorithms=[JWT_ALGORITHM])
+        return decoded_token if decoded_token["expires"] >= time.time() else None
+    except:
+        return {}
+
+
+def verify_jwt(token: str) -> bool:
+    is_token_valid: bool = False
+    try:
+        payload = decodeJWT(token)
+    except:
+        payload = None
+    if payload:
+        is_token_valid = True
+    return is_token_valid
