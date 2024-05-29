@@ -4,30 +4,45 @@ from note_generator.read_file import get_input_chunks
 
 
 def optimize_note(transcription):
-    previous_answer = ""
-    complete_response = ""
-    overall_topic = "Management"
-    k = 1
+    max_retries = 3
+    attempt = 0
 
-    input_chunks = get_input_chunks(transcription)
+    while attempt < max_retries:
+        try:
+            previous_answer = ""
+            complete_response = ""
+            overall_topic = get_overall_topic(transcription)
+            k = 1
 
-    for chunk in input_chunks:
-        cohesive_prompt = create_cohesive_prompt(chunk, overall_topic)
-        response = chain1.invoke(
-            {"con": cohesive_prompt, "overall_topic": overall_topic, "previous_answer": previous_answer})
-        print(response)
-        complete_response = complete_response + response
-        print(k)
-        k = k + 1
-        previous_answer = response
+            input_chunks = get_input_chunks(transcription)
 
-    # print(complete_response)
+            for chunk in input_chunks:
+                cohesive_prompt = create_cohesive_prompt(chunk, overall_topic)
+                response = chain1.invoke(
+                    {"con": cohesive_prompt, "overall_topic": overall_topic, "previous_answer": previous_answer})
+                # print(response)
+                complete_response = complete_response + response
+                print(k)
+                k = k + 1
+                previous_answer = response
 
-    final_answer = chain2.invoke({"domain": complete_response})
+            # print(complete_response)
+            print("starting invoking chain 2..")
 
-    return final_answer
+            final_answer = chain2.invoke({"domain": complete_response})
+
+            return final_answer
+
+        except Exception as e:
+            print(f"An error occurred on attempt {attempt + 1}: {e}")
+            attempt += 1
+
+    print("Failed to complete the process after multiple attempts.")
+    return None
 
 
 def get_overall_topic(transcription):
+    print("starting topic generation...")
     topic = chain0.invoke({"transcript": transcription})
+    print(topic)
     return topic

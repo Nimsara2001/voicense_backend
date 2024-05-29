@@ -3,7 +3,7 @@ from model.user import User, LoginUser
 import controller.auth_controller as controller
 
 router = APIRouter(
-    prefix="/auth",
+    prefix="/auth"
 )
 
 
@@ -28,7 +28,7 @@ async def login(user: LoginUser = Body(...)):
         elif res == "incorrect_password":
             return {"message": "invalid", "reason": "incorrect_password"}
         else:
-            token = controller.signJWT(res["id"], res["user_type"])
+            token = controller.signJWT(res["id"])
             return {"message": "valid", "user": res, "token": token}
     except Exception as e:
         return {"error": str(e)}

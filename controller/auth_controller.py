@@ -15,7 +15,6 @@ JWT_SECRET_KEY = "Ks9Tz2Ld7Xv8Yw5Qr6Uj3Nb1Ec0Fm4Oa"
 JWT_ALGORITHM = "HS256"
 JWT_ACCESS_TOKEN_EXPIRE = 15
 
-# Password hashing
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 
 user_collection = None
@@ -40,6 +39,12 @@ async def set_collection():
 
     if modules_collection is None:
         modules_collection = db["Module"]
+
+
+async def exist_user(username: str) -> bool:
+    await set_collection()
+    user = await user_collection.find_one({"username": username})
+    return user is not None
 
 
 async def exist_user(username: str) -> bool:
@@ -118,13 +123,19 @@ def signJWT(user_id: str, user_type: str) -> Dict[str, str]:
         "expires": time.time() + JWT_ACCESS_TOKEN_EXPIRE * 60
     }
     token = jwt.encode(payload, JWT_SECRET_KEY, algorithm=JWT_ALGORITHM)
+def signJWT(user_id: str) -> Dict[str, str]:
+    payload = {
+        "user_id": user_id,
+        "expires": time.time() + JWT_ACCESS_TOKEN_EXPIRE * 60
+    }
+    token = jwt.encode(payload, JWT_SECRET_KEY, algorithm=JWT_ALGORITHM)
+
     return token_response(token)
 
 
 def decodeJWT(token: str) -> dict:
     try:
-        decoded_token = jwt.decode(
-            token, JWT_SECRET_KEY, algorithms=[JWT_ALGORITHM])
+        decoded_token = jwt.decode(token, JWT_SECRET_KEY, algorithms=[JWT_ALGORITHM])
         return decoded_token if decoded_token["expires"] >= time.time() else None
     except:
         return {}
