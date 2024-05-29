@@ -4,6 +4,7 @@ import controller.module_controller as controller
 
 router = APIRouter(
     prefix="/module",
+    tags=["module"],
 )
 
 
