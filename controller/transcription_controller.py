@@ -12,6 +12,7 @@ async def save_audio(file):
         file_path = f"resources/audio/{file_name}.{file_ext}"
         with open(file_path, 'wb') as f:
             f.write(file.file.read())
+        print("File saved successfully.")
         return {"message": "success", "path": file_path}
     except AttributeError:
         return {"message": "failed", "details": "The file object does not have the expected attributes."}
@@ -24,4 +25,5 @@ async def generate_transcription(path):
     result = model.transcribe(path, fp16=False)
     with open('resources/transcription.txt', 'w') as f:
         f.write(result["text"])
+    print("Transcription generated successfully.")
     return result["text"]

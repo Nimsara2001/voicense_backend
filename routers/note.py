@@ -8,9 +8,11 @@ router = APIRouter(
 
 @router.get("/recent")
 async def recent_notes():
-    with open('resources/transcription2.txt', 'r') as file:
+    with open('resources/transcription.txt', 'r') as file:
         transcription = file.read()
     note = optimize_note(transcription)
+    with open('resources/markdown_view.md', 'w') as file:
+        file.write(note)
     return {"note": note}
 
 
