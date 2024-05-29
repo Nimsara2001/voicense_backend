@@ -7,15 +7,23 @@ from fastapi import HTTPException
 from db_config import get_db
 from model.module import Module
 from model.user import User, get_user_schema, LoginUser
+import logging
 
+
+# JWT settings
 JWT_SECRET_KEY = "Ks9Tz2Ld7Xv8Yw5Qr6Uj3Nb1Ec0Fm4Oa"
 JWT_ALGORITHM = "HS256"
-JWT_ACCESS_TOKEN_EXPIRE = 1
+JWT_ACCESS_TOKEN_EXPIRE = 15
 
+# Password hashing
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 
 user_collection = None
 modules_collection = None
+
+# Intialize loggig
+logging.basicConfig(level=logging.INFO)
+logger = logging.getLogger(__name__)
 
 
 async def set_collection():
@@ -23,7 +31,9 @@ async def set_collection():
     db = await get_db()
 
     if db is None:
-        raise Exception("Failed to get database connection")
+        logger.error("Failed to get database connection")
+        raise HTTPException(
+            staus_code=500, detail="Failed to get database connection")
 
     if user_collection is None:
         user_collection = db["User"]
@@ -66,6 +76,7 @@ async def signup_func(user: User):
                     status_code=500, detail="User insertion failed")
             return str(result.inserted_id)
         except Exception as e:
+            logger.error(f"Error during user signup: {str(e)}")
             raise HTTPException(status_code=500, detail=str(e))
 
 
@@ -88,6 +99,7 @@ async def authenticate_user(login_user: LoginUser):
                 return "incorrect_password"
             return get_user_schema(user)
     except Exception as e:
+        logger.error(f"Error during user authentication: {str(e)}")
         raise HTTPException(status_code=500, detail=str(e))
 
 
@@ -99,13 +111,13 @@ def token_response(token: str):
     }
 
 
-def signJWT(user_id: str) -> Dict[str, str]:
+def signJWT(user_id: str, user_type: str) -> Dict[str, str]:
     payload = {
         "user_id": user_id,
+        "user_type": user_type,
         "expires": time.time() + JWT_ACCESS_TOKEN_EXPIRE * 60
     }
     token = jwt.encode(payload, JWT_SECRET_KEY, algorithm=JWT_ALGORITHM)
-
     return token_response(token)
 
 

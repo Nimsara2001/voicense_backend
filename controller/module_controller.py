@@ -138,6 +138,41 @@ def trash_module_func(module_object_id: str):
             return {"message": "Module not found"}
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
+async def trash_module_func(user_object_id: str, module_id: str):
+    try:
+        if modules_collection is None or notes_collection is None or users_collection is None:
+            await get_collection()
+
+        user_id = ObjectId(user_object_id)
+        # Check if the user exists
+        user = await users_collection.find_one({"_id": user_id})
+        if not user:
+            raise HTTPException(status_code=404, detail="User not found")
+
+        # Check if the module exists in the user's modules
+        if ObjectId(module_id) not in user["modules"]:
+            raise HTTPException(status_code=404, detail="Module not found")
+
+        # Soft delete the module and its associated notes
+        await modules_collection.update_one(
+            {"_id": ObjectId(module_id)},
+            {"$set": {"deleted": True}},
+        )
+        await notes_collection.update_many(
+            {"module_id": ObjectId(module_id)},
+            {"$set": {"deleted": True}},
+        )
+
+        # Remove the module from the user's modules list
+        await users_collection.update_one(
+            {"_id": user_id},
+            {"$pull": {"modules": ObjectId(module_id)}}
+        )
+
+        return {"message": "Module deleted successfully"}
+
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
 
 
 # TODO

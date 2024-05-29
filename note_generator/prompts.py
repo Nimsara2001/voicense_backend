@@ -17,3 +17,8 @@ promptR1 = PromptTemplate(
     input_variables=['domain'],
     template="These are notes created from a different parts of a same lecture on {domain}. Your task is to join these notes into one big note.but do not brief the content. just join them accordinglsy, organize them and keep the flow. Add equations and tables when necessary. Ensure the resulting document is well-organized.word count should be around 1500 and in MD format"
 )
+
+promptTE = PromptTemplate(
+    input_variables=['transcript'],
+    template="This trancription is a raw transcription of some particular topic {transcript}. based on the transcription, guess the broader topic of the discussion and return only that topic name"
+)

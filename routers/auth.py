@@ -6,6 +6,7 @@ router = APIRouter(
     prefix="/auth",
 )
 
+
 @router.post("/signup")
 async def signup(user: User = Body(...)):
     try:
@@ -27,7 +28,7 @@ async def login(user: LoginUser = Body(...)):
         elif res == "incorrect_password":
             return {"message": "invalid", "reason": "incorrect_password"}
         else:
-            token = controller.signJWT(res["id"])
+            token = controller.signJWT(res["id"], res["user_type"])
             return {"message": "valid", "user": res, "token": token}
     except Exception as e:
         return {"error": str(e)}

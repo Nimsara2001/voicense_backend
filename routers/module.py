@@ -36,9 +36,9 @@ async def share_module(module_id: int):
 
 
 @router.delete("/trash/{module_id}")
-async def trash_module(module_id: str):
-    controller.trash_module_func(module_id)
-    return {"message": f"Trash module {module_id}"}
+async def trash_module(user_object_id,module_id: str):
+    await controller.trash_module_func(user_object_id, module_id)  # Assuming you have access to user_object_id
+    return {"message": f"Module {module_id} trashed successfully"}
 
 
 # done
