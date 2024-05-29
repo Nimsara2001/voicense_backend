@@ -3,8 +3,7 @@ from fastapi.encoders import jsonable_encoder
 import controller.module_controller as controller
 
 router = APIRouter(
-    prefix="/module",
-    tags=["module"],
+    prefix="/module"
 )
 
 

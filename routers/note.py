@@ -8,8 +8,7 @@ from controller.note_controller import (delete_note_by_id_permanently,
 
 
 router = APIRouter(
-    prefix="/note",
-    tags=["note"],
+    prefix="/note"
 )
 
 
@@ -18,6 +17,8 @@ async def recent_notes():
     with open('resources/transcription.txt', 'r') as file:
         transcription = file.read()
     note = optimize_note(transcription)
+    with open('resources/markdown_view.md', 'w') as file:
+        file.write(note)
     return {"note": note}
 
 
