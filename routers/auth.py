@@ -3,8 +3,7 @@ from model.user import User, LoginUser
 import controller.auth_controller as controller
 
 router = APIRouter(
-    prefix="/auth",
-    tags=["auth"],
+    prefix="/auth"
 )
 
 
