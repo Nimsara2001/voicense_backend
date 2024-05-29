@@ -186,9 +186,38 @@ def get_other_module_notes_func(module_id: str):
         # Extract desired fields from each document
         for note in find_results:
             selected_fields = {
-                note.get("title"),
-                note.get("created_date"),
-                note.get("description")
+                "title":note.get("title"),
+                "created_date":note.get("created_date"),
+                "description":note.get("description")
+            }
+            selected_characteristics.append(selected_fields)
+
+        return selected_characteristics
+
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+def get_all_modules_titles_func(user_id: str):
+    try:
+        # Search by module_id using a filter with exact match
+        find_results = modules_collection.find({"user_id": user_id})
+
+        # Get the count of matching documents
+        num_modules = modules_collection.count_documents({"user_id": user_id})
+
+        # Raise an exception if no notes found
+        if num_modules == 0:
+            raise HTTPException(status_code=404, detail="No modules found for the specified user_id")
+
+        # Initialize an empty list to store selected characteristics
+        selected_characteristics = []
+
+        # Extract desired fields from each document
+        for module in find_results:
+            selected_fields = {
+                "module_id":module.get("module_id"),
+                "title":module.get("title"),
             }
             selected_characteristics.append(selected_fields)
 

@@ -5,6 +5,7 @@ from note_generator.optimizer import optimize_note
 
 router = APIRouter(
     prefix="/record",
+    tags=["record"],
 )
 
 
