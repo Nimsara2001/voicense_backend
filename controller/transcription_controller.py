@@ -1,5 +1,8 @@
 import whisper
 from secrets import token_hex
+import os
+
+model = whisper.load_model("base.en")
 
 
 async def save_audio(file):
@@ -21,9 +24,22 @@ async def save_audio(file):
 
 
 async def generate_transcription(path):
-    model = whisper.load_model("base.en")
-    result = model.transcribe(path, fp16=False)
-    with open('resources/transcription.txt', 'w') as f:
-        f.write(result["text"])
-    print("Transcription generated successfully.")
-    return result["text"]
+    try:
+        result = model.transcribe(path, fp16=False)
+        print("Transcription generated successfully.")
+
+        return {"message":"success","result":result["text"]}
+    except Exception as e:
+        # Return a message indicating that an error occurred
+        return {"message": "failed", "details": str(e)}
+
+
+async def delete_audio(path):
+    try:
+        os.remove(path)
+        print("File deleted successfully.")
+        return {"message": "success"}
+    except FileNotFoundError:
+        return {"message": "failed", "details": "The file does not exist."}
+    except Exception as e:
+        return {"message": "failed", "details": str(e)}

@@ -16,7 +16,7 @@ langchain-core~=0.1.46
 langchain-experimental~=0.0.57
 langchain-google-genai~=1.0.3
 
-openai-whisper
+
 torch~=2.3.0
 tiktoken~=0.6.0
 python-multipart~=0.0.9

@@ -31,14 +31,15 @@ def optimize_note(transcription):
 
             final_answer = chain2.invoke({"domain": complete_response})
 
-            return final_answer
+            return {"message": "success","title": overall_topic, "content": final_answer}
 
         except Exception as e:
             print(f"An error occurred on attempt {attempt + 1}: {e}")
             attempt += 1
 
     print("Failed to complete the process after multiple attempts.")
-    return None
+
+    return {"message": "failed", "details": "Failed to generate note"}
 
 
 def get_overall_topic(transcription):
