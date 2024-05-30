@@ -31,6 +31,7 @@ async def set_collection():
     if modules_collection is None:
         modules_collection = db["Module"]
 
+
 async def exist_user(username: str) -> bool:
     await set_collection()
     user = await user_collection.find_one({"username": username})
