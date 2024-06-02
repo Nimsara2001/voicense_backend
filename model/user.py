@@ -11,6 +11,7 @@ class User(BaseModel):
     email: str = Field(...)
     modules: Optional[list] = Field(default=[])
 
+
     class Config:
         arbitrary_types_allowed = True
         json_schema_extra = {
