@@ -16,6 +16,7 @@ app.include_router(note.router, tags=["Note"])
 app.include_router(module.router, tags=["Module"])
 app.include_router(record.router, tags=["Record"])
 
+
 @app.get("/")
 async def root():
     db = await get_db()
@@ -30,5 +31,6 @@ async def write_notification(email: str, message=""):
 
 @app.get("/test")
 async def test(background_tasks: BackgroundTasks, email: str):
-    background_tasks.add_task(write_notification, email, message="some notification")
+    background_tasks.add_task(
+        write_notification, email, message="some notification")
     return "Test notification sent in the background"
