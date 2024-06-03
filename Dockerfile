@@ -14,10 +14,6 @@ RUN apt-get update && apt-get install -y ffmpeg
 
 COPY . .
 
-RUN mkdir -p resources/audio
-
 EXPOSE 8000
-
-VOLUME ["D:/voicense_volume:/resources/audio"]
 
 CMD ["uvicorn","main:app","--host","0.0.0.0","--port","8000"]

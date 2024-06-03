@@ -15,37 +15,32 @@ async def upload_record(
         user_id: Annotated[str, Body],
         module_id: Annotated[str, Body],
 ):
-    res = await controller.save_audio(file)
+    try:
+        res = await controller.save_audio(file)
 
-    if res["message"] == "failed":
-        return res
-    else:
-        transcription = await controller.generate_transcription(res["path"])
-        if transcription["message"] == "failed":
-            return transcription
+        if res["message"] == "failed":
+            return res
 
-        note = optimize_note(transcription["result"])
-        if note["message"] == "failed":
-            return note
+        else:
+            transcription = await controller.generate_transcription(res["path"])
+            if transcription["message"] == "failed":
+                return transcription
 
-        await save_note_and_transcription(note, transcription["result"], module_id)
+            note = optimize_note(transcription["result"])
+            if note["message"] == "failed":
+                return note
+            else:
+                db_save = await save_note_and_transcription(note, transcription["result"], module_id)
+                if db_save["message"] == "failed":
+                    return db_save
 
-        await controller.delete_audio(res["path"])
+                await controller.delete_audio(res["path"])
 
-    return {
-        "message": "successful",
-        "user_id": user_id,
-        "transcription": transcription,
-        "note": note
-    }
-
-
-@router.get("/test")
-async def test():
-    note = {"title": "test", "content": "test"}
-    transcription = "test"
-    module_id = "6638b74cf81ffd971fadfa68"
-
-    res=await save_note_and_transcription(note, transcription, module_id)
-
-    return res
+        return {
+            "message": "successful",
+            "user_id": user_id,
+            "note_id": db_save["note_id"],
+            "module_id": db_save["module_id"]
+        }
+    except Exception as e:
+        return {"message": "failed", "error": str(e)}

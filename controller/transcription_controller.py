@@ -8,15 +8,21 @@ model = whisper.load_model("base.en")
 async def save_audio(file):
     try:
         file_ext = file.filename.split('.')[-1]
+
         if file_ext not in ['wav', 'mp3', 'flac', "m4a"]:
-            print("Invalid file type. Please upload an audio file.")
-            return None
+            return {"message": "failed", "details": "Invalid file type. Please upload an audio file."}
+
         file_name = token_hex(8)
+
+        os.makedirs("resources/audio", exist_ok=True)
+
         file_path = f"resources/audio/{file_name}.{file_ext}"
+
         with open(file_path, 'wb') as f:
             f.write(file.file.read())
-        print("File saved successfully.")
+
         return {"message": "success", "path": file_path}
+
     except AttributeError:
         return {"message": "failed", "details": "The file object does not have the expected attributes."}
     except IOError:
@@ -26,11 +32,10 @@ async def save_audio(file):
 async def generate_transcription(path):
     try:
         result = model.transcribe(path, fp16=False)
-        print("Transcription generated successfully.")
+        return {"message": "success", "result": result["text"]}
 
-        return {"message":"success","result":result["text"]}
     except Exception as e:
-        # Return a message indicating that an error occurred
+
         return {"message": "failed", "details": str(e)}
 
 
