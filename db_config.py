@@ -1,6 +1,6 @@
 from motor.motor_asyncio import AsyncIOMotorClient
 
-uri = "mongodb+srv://admin:1234@cluster0.4ahsat4.mongodb.net/"
+uri = "mongodb+srv://admin:1234@cluster0.4ahsat4.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0"
 client = AsyncIOMotorClient(uri)
 
 

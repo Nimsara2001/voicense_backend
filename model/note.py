@@ -1,6 +1,3 @@
-from datetime import datetime
-
-from bson import Timestamp
 from pydantic import BaseModel, Field
 
 
@@ -8,7 +5,7 @@ class Note(BaseModel):
     title: str = Field(...)
     description: str = Field(...)
     content: str = Field(...)
-    created_date: str= Field(...)
+    created_date: str = Field(...)
     last_accessed: str = Field(...)
     is_deleted: bool = Field(default=False)
 

@@ -1,6 +1,4 @@
-from typing import Optional
-
-from bson import Timestamp, ObjectId
+from bson import ObjectId
 from pydantic import BaseModel, Field
 
 

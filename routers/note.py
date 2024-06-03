@@ -1,11 +1,5 @@
 from fastapi import APIRouter
-from note_generator.optimizer import optimize_note
-from controller.note_controller import (delete_note_by_id_permanently, 
-                                        get_note_by_id, 
-                                        recently_accessed_notes, 
-                                        restore_note_by_id, 
-                                        trash_note_by_id)
-
+import controller.note_controller as controller
 
 router = APIRouter(
     prefix="/note"
@@ -14,48 +8,67 @@ router = APIRouter(
 
 @router.get("/recent")
 async def recent_notes():
-    with open('resources/transcription.txt', 'r') as file:
-        transcription = file.read()
-    note = optimize_note(transcription)
-    with open('resources/markdown_view.md', 'w') as file:
-        file.write(note)
-    return {"note": note}
-
-
-#this gives the recent notes we have accessed
-@router.get("/recentnotes")
-async def recent_notes():
-    notes= await recently_accessed_notes()
-    return notes
-    # return {"message": "Recent notes"}
-
-#todo: search notes
-@router.post("/search")
-async def search_notes():
-    return {"message": "Search notes"}
+    try:
+        notes = await controller.recently_accessed_notes()
+        return notes
+    except Exception as e:
+        return {"message": "failed", "error": str(e)}
 
 
 @router.get("/{note_id}")
 async def view_note(note_id: str):
-    note = await get_note_by_id(note_id)
-    return note
+    try:
+        note = await controller.get_note_by_id(note_id)
+        return note
+    except Exception as e:
+        return {"message": "failed", "error": str(e)}
+
+
+@router.put("/update_accessed/{note_id}")
+async def update_accessed(note_id: str):
+    try:
+        response = await controller.update_last_accessed(note_id)
+        return response
+    except Exception as e:
+        return {"message": "failed", "error": str(e)}
+
 
 @router.put("/trash/{note_id}")
 async def trash_note(note_id: str):
-    response = await trash_note_by_id(note_id)
-    return response
+    try:
+        response = await controller.trash_note_by_id(note_id)
+        return response
+    except Exception as e:
+        return {"message": "failed", "error": str(e)}
 
-@router.put("/restore/{note_id}")
+
+@router.post("/restore/{note_id}")
 async def restore_trash_note(note_id: str):
-    response = await restore_note_by_id(note_id)
-    return response
+    try:
+        response = await controller.restore_note_by_id(note_id)
+        return response
+    except Exception as e:
+        return {"message": "failed", "error": str(e)}
+
 
 @router.delete("/delete/{note_id}")
 async def delete_note(note_id: str):
-    response = await delete_note_by_id_permanently(note_id)
-    return response
+    try:
+        response = await controller.delete_note_by_id_permanently(note_id)
+        return response
+    except Exception as e:
+        return {"message": "failed", "error": str(e)}
 
-#todo: share note
+
+@router.post("/search")
+async def search_notes(search_query: str):
+    try:
+        notes = await controller.search_notes_by_prompt(search_query)
+        return notes
+    except Exception as e:
+        return {"message": "failed", "error": str(e)}
+
+
 @router.post("/share/{note_id}")
-async def share_note(note_id: int):
+async def share_note(note_id: str):
     return {"message": "Note shared"}
