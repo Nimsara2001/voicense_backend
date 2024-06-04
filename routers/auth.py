@@ -6,6 +6,7 @@ router = APIRouter(
     prefix="/auth"
 )
 
+
 @router.post("/signup")
 async def signup(user: User = Body(...)):
     try:

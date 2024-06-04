@@ -20,10 +20,11 @@ class User(BaseModel):
                 "last_name": "Premarathna",
                 "username": "mihin",
                 "password": "mihin123",
-                "email": "example@gmai.com",
+                "email": "example@gmail.com",
                 "modules": []
             }
         }
+
 
 class LoginUser(BaseModel):
     username: str = Field(...)
@@ -36,6 +37,7 @@ class LoginUser(BaseModel):
                 "password": "mihin123"
             }
         }
+
 
 def get_user_schema(user):
     return {
