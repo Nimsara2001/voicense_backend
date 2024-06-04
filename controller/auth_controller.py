@@ -111,7 +111,6 @@ def token_response(token: str):
         "access_token": token
     }
 
-
 def signJWT(user_id: str, user_type: str) -> Dict[str, str]:
     payload = {
         "user_id": user_id,
