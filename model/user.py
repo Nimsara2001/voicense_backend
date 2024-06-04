@@ -11,7 +11,6 @@ class User(BaseModel):
     email: str = Field(...)
     modules: Optional[list] = Field(default=[])
 
-
     class Config:
         arbitrary_types_allowed = True
         json_schema_extra = {
@@ -26,7 +25,6 @@ class User(BaseModel):
             }
         }
 
-
 class LoginUser(BaseModel):
     username: str = Field(...)
     password: str = Field(...)
@@ -38,7 +36,6 @@ class LoginUser(BaseModel):
                 "password": "mihin123"
             }
         }
-
 
 def get_user_schema(user):
     return {

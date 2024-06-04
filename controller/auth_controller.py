@@ -47,12 +47,6 @@ async def exist_user(username: str) -> bool:
     return user is not None
 
 
-async def exist_user(username: str) -> bool:
-    await set_collection()
-    user = await user_collection.find_one({"username": username})
-    return user is not None
-
-
 async def init_other_module(username: str):
     await set_collection()
     current_date = datetime.now().date()
@@ -102,7 +96,9 @@ async def authenticate_user(login_user: LoginUser):
         else:
             if not verify_password(login_user.password, user["password"]):
                 return "incorrect_password"
-            return get_user_schema(user)
+            user_schema = get_user_schema(user)
+            user_type = user["user_type"]
+            return {"user_schema": user_schema, "user_type": user_type}
     except Exception as e:
         logger.error(f"Error during user authentication: {str(e)}")
         raise HTTPException(status_code=500, detail=str(e))
@@ -115,6 +111,7 @@ def token_response(token: str):
         "access_token": token
     }
 
+
 def signJWT(user_id: str, user_type: str) -> Dict[str, str]:
     payload = {
         "user_id": user_id,
@@ -122,25 +119,16 @@ def signJWT(user_id: str, user_type: str) -> Dict[str, str]:
         "expires": time.time() + JWT_ACCESS_TOKEN_EXPIRE * 60
     }
     token = jwt.encode(payload, JWT_SECRET_KEY, algorithm=JWT_ALGORITHM)
-
-# def signJWT(user_id: str) -> Dict[str, str]:
-#     payload = {
-#         "user_id": user_id,
-#         "expires": time.time() + JWT_ACCESS_TOKEN_EXPIRE * 60
-#     }
-#     token = jwt.encode(payload, JWT_SECRET_KEY, algorithm=JWT_ALGORITHM)
-
-#     return token_response(token)
-
+    return token_response(token)
 
 
 def decodeJWT(token: str) -> dict:
     try:
-        decoded_token = jwt.decode(token, JWT_SECRET_KEY, algorithms=[JWT_ALGORITHM])
+        decoded_token = jwt.decode(
+            token, JWT_SECRET_KEY, algorithms=[JWT_ALGORITHM])
         return decoded_token if decoded_token["expires"] >= time.time() else None
     except:
         return {}
-
 
 
 def verify_jwt(token: str) -> bool:

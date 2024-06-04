@@ -27,8 +27,11 @@ async def login(user: LoginUser = Body(...)):
         elif res == "incorrect_password":
             return {"message": "invalid", "reason": "incorrect_password"}
         else:
-            token = controller.signJWT(res["id"])
-            return {"message": "valid", "user": res, "token": token}
+            user_schema = res["user_schema"]
+            user_type = res["user_type"]
+            user_id = user_schema["id"]
+            token = controller.signJWT(user_id, user_type)
+            return {"message": "valid", "user": user_schema, "user_type": user_type, "token": token}
     except Exception as e:
         return {"error": str(e)}
 
