@@ -17,6 +17,5 @@ def get_note_schema(note):
         "description": note["description"],
         "content": note["content"],
         "created_date": note["created_date"],
-        "last_accessed": note["last_accessed"],
-        "is_deleted": note["is_deleted"]
+        "last_accessed": note["last_accessed"]
     }
