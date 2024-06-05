@@ -49,6 +49,5 @@ def get_user_schema(user):
         "user_type": user["user_type"],
         "first_name": user["first_name"],
         "last_name": user["last_name"],
-        "username": user["username"],
-        "hashed_password": str(user["password"])
+        "username": user["username"]
     }
