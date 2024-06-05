@@ -1,231 +1,133 @@
+from bson.errors import InvalidId
+
 from db_config import get_db
 from fastapi import HTTPException
 from bson import ObjectId
 from fastapi.encoders import jsonable_encoder
+
+from model.module import get_module_schema
+from model.note import get_note_schema
 
 modules_collection = None
 notes_collection = None
 users_collection = None
 
 async def get_collection():
-    global modules_collection
-    global notes_collection
-    global users_collection
+    global modules_collection, notes_collection, users_collection
+
     db = await get_db()
-    modules_collection = db["Module"]
-    notes_collection = db["Note"]
-    users_collection = db["User"]
+    if db is None:
+        raise Exception("Failed to get database connection")
+
+    if modules_collection is None:
+        modules_collection = db["Module"]
+
+    if notes_collection is None:
+        notes_collection = db["Note"]
+
+    if users_collection is None:
+        users_collection = db["User"]
 
 
-async def get_all_modules_func(user_object_id: str):
+async def get_all_modules_func(user_id: str):
+    await get_collection()
     try:
-        # Ensure collections are initialized
-        if modules_collection is None or notes_collection is None or users_collection is None:
-            await get_collection()
+        user_id = ObjectId(user_id)
+    except InvalidId:
+        raise HTTPException(status_code=400, detail="Invalid user_id")
 
-        user_id = ObjectId(user_object_id)
-        # Search by module_id using a filter with exact match
-        user = await users_collection.find_one({"_id": user_id})
-        if user:
-            # Convert ObjectIds to strings
-            modules_data = []
-            for module_id in user["modules"]:
-                module = await modules_collection.find_one({"_id": module_id})
-                if module:
-                    module_data = jsonable_encoder(module)
-                    modules_data.append(module_data)
-            return modules_data
-        else:
-            print("no user is found")
-            return None
-    except Exception as e:
-        # Handle exceptions gracefully
-        raise HTTPException(status_code=500, detail=str(e))
+    user = await users_collection.find_one({"_id": user_id})
+
+    if user is None:
+        raise HTTPException(status_code=404, detail="User not found")
+
+    modules = []
+    for module_id in user["modules"]:
+        module = await modules_collection.find_one({"_id": module_id})
+        if module is not None:
+            modules.append(module)
+
+    if len(modules) == 0:
+        raise HTTPException(status_code=404, detail=f"No modules found for the specified {user_id}")
+    else:
+        module_schemas = [get_module_schema(module) for module in modules]
+
+    return module_schemas
 
 
-async def get_all_modules_titles_func(user_object_id: str):
+async def get_all_notes_of_module_func(module_id: str,is_other:bool):
+    await get_collection()
     try:
-        if modules_collection is None or notes_collection is None or users_collection is None:
-            await get_collection()
-        user_id = ObjectId(user_object_id)
-        # Search by module_id using a filter with exact match
-        user = await users_collection.find_one({"_id": user_id})
-        data_retrieved = []
-        print("1st step done")
-        if user:
-            # Convert ObjectIds to strings
-            for module_id in user["modules"]:
-                data_retrieved.append(str(module_id))
-        modules = data_retrieved
-        print("2nd step done")
-        print(modules)
-        if modules:
-            titles_retrieved = []
-            for module in modules:
-                module_object_id = ObjectId(module)
-                print("searching for...")
-                print(module_object_id)
-                module_object = await modules_collection.find_one({"_id": module_object_id})
-                titles_retrieved.append(module_object["title"])
-                print("3rd step done")
-                print(titles_retrieved)
-            return titles_retrieved
-        else:
-            print("no modules are found")
-            return None
-    except Exception as e:
-        # Handle exceptions gracefully
-        raise HTTPException(status_code=500, detail=str(e))
+        module_id = ObjectId(module_id)
+    except InvalidId:
+        raise HTTPException(status_code=400, detail="Invalid module_id")
+
+    module = await modules_collection.find_one({"_id": module_id})
+
+    if module is None:
+        raise HTTPException(status_code=404, detail="Module not found")
+
+    if is_other:
+        if not module["title"].endswith("_other"):
+            raise HTTPException(status_code=400, detail="Module is not an other module")
+    else:
+        if module["title"].endswith("_other"):
+            raise HTTPException(status_code=400, detail="Module is an other module")
+
+    notes = []
+    for note_id in module["notes"]:
+        note = await notes_collection.find_one({"_id": note_id})
+        if note is not None:
+            notes.append(note)
+
+    if len(notes) == 0:
+        raise HTTPException(status_code=404, detail="No notes found for the specified module_id")
+    else:
+        note_schema = [get_note_schema(note) for note in notes]
+
+    return note_schema
 
 
-async def get_all_notes_func(user_object_id: str, relevant_module_id: str):
+async def search_module_func(search_text: str):
+    await get_collection()
+
+    await modules_collection.create_index([("title", "text")])
+
+    module_cursor = modules_collection.find({
+        "$text": {"$search": search_text},
+        "title": {"$not": {"$regex": "_other$"}}
+    })
+
+    modules = await module_cursor.to_list(length=100)
+
+    if modules:
+        search_modules = [get_module_schema(module) for module in modules]
+        return search_modules
+    else:
+        return {"message": "failed", "detail": "No module found"}
+
+
+async def trash_module_func(module_id: str):
+    await get_collection()
     try:
-        if modules_collection is None or notes_collection is None or users_collection is None:
-            await get_collection()
-        user_id = ObjectId(user_object_id)
-        # Search by module_id using a filter with exact match
-        user = await users_collection.find_one({"_id": user_id})
-        data_retrieved = []
-        print("1st step done")
-        if user:
-            # Convert ObjectIds to strings
-            for module_id in user["modules"]:
-                data_retrieved.append(str(module_id))
-        modules = data_retrieved
-        print("2nd step done")
-        print(modules)
-        if modules:
-            titles_retrieved = []
-            for module in modules:
-                if (module == relevant_module_id):
-                    module_object_id = ObjectId(module)
-                    module_object = await modules_collection.find_one({"_id": module_object_id})
-                    if module_object:
-                        # Convert ObjectIds to strings
-                        note_ids_retrieved = []
-                        for note_id in module_object["notes"]:
-                            note_ids_retrieved.append(str(note_id))
-                        return note_ids_retrieved
-    except Exception as e:
-        raise HTTPException(status_code=500, detail=str(e))
+        module_id = ObjectId(module_id)
+    except InvalidId:
+        raise HTTPException(status_code=400, detail="Invalid module_id")
 
+    module = await modules_collection.find_one({"_id": module_id})
 
-# TODO
-def search_module_func(text: str):
-    try:
-        # Search within "module_title" field
-        # search_query = {"module_id": {"$regex": text, "$options": "i"}, "_id": 0}
-        # cursor = modules_collection.find(search_query)
-        retrieved = modules_collection.find_one({"titles": text})
-        # Convert cursor to list of dictionaries
-        print("this is the text")
-        print(text)
-        results = [document for document in retrieved]
-        print("this is result")
-        print(results)
-        return {"message": results}
-    except Exception as e:
-        raise HTTPException(status_code=500, detail=str(e))
+    if module is None:
+        raise HTTPException(status_code=404, detail="Module not found")
 
+    if module["title"].endswith("_other"):
+        raise HTTPException(status_code=400, detail="Cannot trash other module")
 
-# TODO
-async def trash_module_func(user_object_id: str, module_id: str):
-    try:
-        if modules_collection is None or notes_collection is None or users_collection is None:
-            await get_collection()
+    updated_result = await modules_collection.update_one(
+        {"_id": module_id},
+        {"$set": {"is_deleted": True}}
+    )
 
-        user_id = ObjectId(user_object_id)
-        # Check if the user exists
-        user = await users_collection.find_one({"_id": user_id})
-        if not user:
-            raise HTTPException(status_code=404, detail="User not found")
+    if updated_result.modified_count == 0:
+        raise HTTPException(status_code=500, detail="Failed to trash module")
 
-        # Check if the module exists in the user's modules
-        if ObjectId(module_id) not in user["modules"]:
-            raise HTTPException(status_code=404, detail="Module not found")
-
-        # Soft delete the module and its associated notes
-        await modules_collection.update_one(
-            {"_id": ObjectId(module_id)},
-            {"$set": {"deleted": True}},
-        )
-        await notes_collection.update_many(
-            {"module_id": ObjectId(module_id)},
-            {"$set": {"deleted": True}},
-        )
-
-        # Remove the module from the user's modules list
-        await users_collection.update_one(
-            {"_id": user_id},
-            {"$pull": {"modules": ObjectId(module_id)}}
-        )
-
-        return {"message": "Module deleted successfully"}
-
-    except Exception as e:
-        raise HTTPException(status_code=500, detail=str(e))
-
-
-# TODO
-def get_other_module_notes_func(module_id: str):
-    try:
-        # Search by module_id using a filter with exact match
-        find_results = notes_collection.find({"module_id": module_id})
-
-        # Get the count of matching documents
-        num_notes = notes_collection.count_documents({"module_id": module_id})
-
-        # Raise an exception if no notes found
-        if num_notes == 0:
-            raise HTTPException(status_code=404, detail="No notes found for the specified module_id")
-
-        # Initialize an empty list to store selected characteristics
-        selected_characteristics = []
-
-        # Extract desired fields from each document
-        for note in find_results:
-            selected_fields = {
-                "title":note.get("title"),
-                "created_date":note.get("created_date"),
-                "description":note.get("description")
-            }
-            selected_characteristics.append(selected_fields)
-
-        return selected_characteristics
-
-    except Exception as e:
-        raise HTTPException(status_code=500, detail=str(e))
-
-
-def get_all_modules_titles_func(user_id: str):
-    try:
-        # Search by module_id using a filter with exact match
-        find_results = modules_collection.find({"user_id": user_id})
-
-        # Get the count of matching documents
-        num_modules = modules_collection.count_documents({"user_id": user_id})
-
-        # Raise an exception if no notes found
-        if num_modules == 0:
-            raise HTTPException(status_code=404, detail="No modules found for the specified user_id")
-
-        # Initialize an empty list to store selected characteristics
-        selected_characteristics = []
-
-        # Extract desired fields from each document
-        for module in find_results:
-            selected_fields = {
-                "module_id":module.get("module_id"),
-                "title":module.get("title"),
-            }
-            selected_characteristics.append(selected_fields)
-
-        return selected_characteristics
-
-    except Exception as e:
-        raise HTTPException(status_code=500, detail=str(e))
-
-# @app.get("/get_mod_id")
-# async def get_module(module_name: str):
-#     module = modules_collection.find_one({'module_name': module_name})
-
+    return {"message": "success", "detail": "Module trashed successfully"}
