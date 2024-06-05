@@ -12,11 +12,11 @@ async def signup(user: User = Body(...)):
     try:
         res = await controller.signup_func(user)
         if res == "exist_user":
-            return {"message": "failed", "reason": "exist_user"}
+            return {"message": "invalid", "reason": "exist_user"}
         else:
             return {"message": "success", "user_id": res}
     except Exception as e:
-        return {"error": str(e)}
+        return {"message": "failed", "error": str(e)}
 
 
 @router.post("/login")
@@ -29,9 +29,9 @@ async def login(user: LoginUser = Body(...)):
             return {"message": "invalid", "reason": "incorrect_password"}
         else:
             token = controller.signJWT(res["id"])
-            return {"message": "valid", "user": res, "token": token}
+            return {"message": "success", "user": res, "token": token}
     except Exception as e:
-        return {"error": str(e)}
+        return {"message": "failed", "error": str(e)}
 
 
 @router.post("/logout")

@@ -1,5 +1,4 @@
 from fastapi import APIRouter
-from fastapi.encoders import jsonable_encoder
 import controller.module_controller as controller
 
 router = APIRouter(
@@ -8,52 +7,49 @@ router = APIRouter(
 
 
 @router.get("/all")
-async def get_all_modules(user_object_id: str):
-    modules = await controller.get_all_modules_func(user_object_id)
-    return modules
+async def get_all_modules(user_id: str):
+    try:
+        modules = await controller.get_all_modules_func(user_id)
+        return {"message": "success", "response": modules}
+    except Exception as e:
+        return {"message": "failed", "error": str(e)}
 
 
-@router.get("/titles")
-async def get_all_modules_titles(user_object_id: str):
-    modules = await controller.get_all_modules_titles_func(user_object_id)
-    return modules
-
-
-# done
+@router.post("/{module_id}/notes")
+async def view_module_notes(module_id: str):
+    try:
+        notes = await controller.get_all_notes_of_module_func(module_id, False)
+        return {"message": "success", "response": notes}
+    except Exception as e:
+        return {"message": "failed", "error": str(e)}
 
 
 @router.post("/search")
-async def search_module(search_text):
-    search_results = controller.search_module_func(search_text)
-    return {"message": search_results["message"]}  # Access "message" key directly
+async def search_module(search_text: str):
+    try:
+        search_results = await controller.search_module_func(search_text)
+        return {"message": "success", "response": search_results}
+    except Exception as e:
+        return {"message": "failed", "error": str(e)}
 
 
-# modify
-
-@router.get("/share/{module_id}")
-async def share_module(module_id: int):
-    return {"message": f"Share module {module_id}"}
-
-
-@router.delete("/trash/{module_id}")
-async def trash_module(user_object_id,module_id: str):
-    await controller.trash_module_func(user_object_id, module_id)  # Assuming you have access to user_object_id
-    return {"message": f"Module {module_id} trashed successfully"}
+@router.put("/trash/{module_id}")
+async def trash_module(module_id: str):
+    try:
+        res = await controller.trash_module_func(module_id)
+        return {"message": "success", "response": res}
+    except Exception as e:
+        return {"message": "failed", "error": str(e)}
 
 
-# done
-
-@router.post("/{module_id}/notes")
-async def view_module_notes(user_object_id: str, relevant_module_id: str):
-    notes = await controller.get_all_notes_func(user_object_id, relevant_module_id)
-    return notes
-
-
-@router.get("/other/notes")
+@router.post("/other/notes")
 async def view_other_module_notes(module_id: str):
-    other_notes = controller.get_other_module_notes_func(module_id)
-    return {"message": other_notes}
-#test comment
+    try:
+        other_notes = await controller.get_all_notes_of_module_func(module_id, True)
+        return {"message": "success", "response": other_notes}
+    except Exception as e:
+        return {"message": "failed", "error": str(e)}
+
 
 @router.post("/add")
 async def add_module():
@@ -64,3 +60,8 @@ async def add_module():
 @router.post("/edit/{module_id}")
 async def edit_module(module_id: int):
     return {"message": f"Edit module {module_id}"}
+
+
+@router.get("/share/{module_id}")
+async def share_module(module_id: int):
+    return {"message": f"Share module {module_id}"}
