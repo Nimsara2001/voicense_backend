@@ -10,7 +10,7 @@ from model.user import User, get_user_schema, LoginUser
 
 JWT_SECRET_KEY = "Ks9Tz2Ld7Xv8Yw5Qr6Uj3Nb1Ec0Fm4Oa"
 JWT_ALGORITHM = "HS256"
-JWT_ACCESS_TOKEN_EXPIRE = 1
+JWT_ACCESS_TOKEN_EXPIRE = 60
 
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 
@@ -40,13 +40,16 @@ async def exist_user(username: str) -> bool:
 
 async def init_other_module(username: str):
     await set_collection()
+
     current_date = datetime.now().date()
     current_timestamp = datetime.now()
+
     new_module = Module(
         title=f"{username}_other",
         created_date=str(current_date),
         last_accessed=str(current_timestamp),
     )
+
     result = await modules_collection.insert_one(new_module.dict())
     return result.inserted_id
 
@@ -101,7 +104,7 @@ def token_response(token: str):
 def signJWT(user_id: str) -> Dict[str, str]:
     payload = {
         "user_id": user_id,
-        "expires": time.time() + JWT_ACCESS_TOKEN_EXPIRE * 60
+        "expires": time.time() + JWT_ACCESS_TOKEN_EXPIRE * 60*60*24
     }
     token = jwt.encode(payload, JWT_SECRET_KEY, algorithm=JWT_ALGORITHM)
 

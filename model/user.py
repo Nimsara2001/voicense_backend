@@ -1,9 +1,15 @@
 from typing import Optional
 from pydantic import BaseModel, Field
+from enum import Enum
+
+
+class UserType(str, Enum):
+    Student = "Student"
+    Lecturer = "Lecturer"
 
 
 class User(BaseModel):
-    user_type: str = Field(...)
+    user_type: UserType = Field(...)
     first_name: str = Field(...)
     last_name: str = Field(...)
     username: str = Field(...)
