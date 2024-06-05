@@ -18,6 +18,9 @@ async def get_collection():
     global notes_collection, transcriptions_collection, modules_collection
     db = await get_db()
 
+    if db is None:
+        raise HTTPException(status_code=500, detail="Database connection error")
+
     if notes_collection is None:
         notes_collection = db["Note"]
 
@@ -46,7 +49,11 @@ async def get_note_by_id(note_id: str):
     except InvalidId:
         raise HTTPException(status_code=400, detail="Invalid note_id")
 
-    note = await notes_collection.find_one({"_id": note_id, "is_deleted": False})
+    try:
+        note = await notes_collection.find_one({"_id": note_id, "is_deleted": False})
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
     if note:
         return get_note_schema(note)
     else:
@@ -113,7 +120,7 @@ async def delete_note_by_id_permanently(note_id: str):
     if result.deleted_count == 1:
         return {"message": "success", "detail": f"Note with ID {note_id} has been deleted permanently"}
     elif result.deleted_count == 0:
-        return {"message": "failed", "detail": f"Note with ID {note_id} not found or not trashed"}
+        raise HTTPException(status_code=404, detail=f"Note with ID {note_id} not found or already deleted")
     else:
         raise HTTPException(status_code=400, detail=f"Unexpected error occurred while deleting note with ID {note_id}")
 
@@ -195,7 +202,7 @@ async def search_notes_by_prompt(search_query: str):
         search_notes = [get_note_schema(note) for note in notes]
         return search_notes
     else:
-        return {"message": "failed", "detail": "No notes found"}
+        raise HTTPException(status_code=404, detail="No notes found")
 
 # def get_content_as_md(content: str):
 #     os.makedirs("resources/markdown", exist_ok=True)

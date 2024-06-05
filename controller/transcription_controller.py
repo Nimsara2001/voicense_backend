@@ -35,7 +35,6 @@ async def generate_transcription(path):
         return {"message": "success", "result": result["text"]}
 
     except Exception as e:
-
         return {"message": "failed", "details": str(e)}
 
 

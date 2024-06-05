@@ -34,13 +34,14 @@ async def upload_record(
                 if db_save["message"] == "failed":
                     return db_save
 
-                await controller.delete_audio(res["path"])
+                file_delete = await controller.delete_audio(res["path"])
 
         return {
-            "message": "successful",
+            "message": "success",
             "user_id": user_id,
             "note_id": db_save["note_id"],
-            "module_id": db_save["module_id"]
+            "module_id": db_save["module_id"],
+            "file_delete": file_delete["message"]
         }
     except Exception as e:
-        return {"message": "failed", "error": str(e)}
+        return {"message": "failed", "detail": str(e)}
