@@ -1,4 +1,4 @@
-from fastapi import APIRouter, Body
+from fastapi import APIRouter, Body, HTTPException
 from model.user import User, LoginUser
 import controller.auth_controller as controller
 
@@ -16,7 +16,7 @@ async def signup(user: User = Body(...)):
         else:
             return {"message": "success", "user_id": res}
     except Exception as e:
-        return {"message": "failed", "error": str(e)}
+        raise HTTPException(status_code=500, detail=str(e))
 
 
 @router.post("/login")
@@ -31,7 +31,7 @@ async def login(user: LoginUser = Body(...)):
             token = controller.signJWT(res["id"])
             return {"message": "success", "user": res, "token": token}
     except Exception as e:
-        return {"message": "failed", "error": str(e)}
+        raise HTTPException(status_code=500, detail=str(e))
 
 
 @router.post("/logout")
