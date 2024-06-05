@@ -10,7 +10,7 @@ router = APIRouter(
 async def get_all_modules(user_id: str):
     try:
         modules = await controller.get_all_modules_func(user_id)
-        return modules
+        return {"message": "success", "response": modules}
     except Exception as e:
         return {"message": "failed", "error": str(e)}
 
@@ -19,7 +19,7 @@ async def get_all_modules(user_id: str):
 async def view_module_notes(module_id: str):
     try:
         notes = await controller.get_all_notes_of_module_func(module_id, False)
-        return notes
+        return {"message": "success", "response": notes}
     except Exception as e:
         return {"message": "failed", "error": str(e)}
 
@@ -28,7 +28,7 @@ async def view_module_notes(module_id: str):
 async def search_module(search_text: str):
     try:
         search_results = await controller.search_module_func(search_text)
-        return search_results
+        return {"message": "success", "response": search_results}
     except Exception as e:
         return {"message": "failed", "error": str(e)}
 
@@ -37,7 +37,7 @@ async def search_module(search_text: str):
 async def trash_module(module_id: str):
     try:
         res = await controller.trash_module_func(module_id)
-        return res
+        return {"message": "success", "response": res}
     except Exception as e:
         return {"message": "failed", "error": str(e)}
 
@@ -46,7 +46,7 @@ async def trash_module(module_id: str):
 async def view_other_module_notes(module_id: str):
     try:
         other_notes = await controller.get_all_notes_of_module_func(module_id, True)
-        return other_notes
+        return {"message": "success", "response": other_notes}
     except Exception as e:
         return {"message": "failed", "error": str(e)}
 

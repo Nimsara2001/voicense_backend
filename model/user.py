@@ -50,6 +50,5 @@ def get_user_schema(user):
         "first_name": user["first_name"],
         "last_name": user["last_name"],
         "username": user["username"],
-        "hashed_password": str(user["password"]),
-        "modules": [str(module_id) for module_id in user["modules"]]
+        "hashed_password": str(user["password"])
     }
