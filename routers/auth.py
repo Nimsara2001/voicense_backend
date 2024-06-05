@@ -12,9 +12,9 @@ async def signup(user: User = Body(...)):
     try:
         res = await controller.signup_func(user)
         if res == "exist_user":
-            return {"message": "exist_user"}
+            return {"message": "failed", "reason": "exist_user"}
         else:
-            return {"message": "successful", "user_id": res}
+            return {"message": "success", "user_id": res}
     except Exception as e:
         return {"error": str(e)}
 
