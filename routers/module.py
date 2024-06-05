@@ -53,7 +53,7 @@ async def view_module_notes(user_object_id: str, relevant_module_id: str):
 async def view_other_module_notes(module_id: str):
     other_notes = controller.get_other_module_notes_func(module_id)
     return {"message": other_notes}
-
+#test comment
 
 @router.post("/add")
 async def add_module():
