@@ -10,7 +10,7 @@ router = APIRouter(
 async def recent_notes():
     try:
         notes = await controller.recently_accessed_notes()
-        return notes
+        return {"message": "success", "response": notes}
     except Exception as e:
         return {"message": "failed", "error": str(e)}
 
@@ -19,7 +19,7 @@ async def recent_notes():
 async def view_note(note_id: str):
     try:
         note = await controller.get_note_by_id(note_id)
-        return note
+        return {"message": "success", "response": note}
     except Exception as e:
         return {"message": "failed", "error": str(e)}
 
@@ -28,7 +28,7 @@ async def view_note(note_id: str):
 async def update_accessed(note_id: str):
     try:
         response = await controller.update_last_accessed(note_id)
-        return response
+        return {"message": "success", "response": response}
     except Exception as e:
         return {"message": "failed", "error": str(e)}
 
@@ -37,7 +37,7 @@ async def update_accessed(note_id: str):
 async def trash_note(note_id: str):
     try:
         response = await controller.trash_note_by_id(note_id)
-        return response
+        return {"message": "success", "response": response}
     except Exception as e:
         return {"message": "failed", "error": str(e)}
 
@@ -46,7 +46,7 @@ async def trash_note(note_id: str):
 async def restore_trash_note(note_id: str):
     try:
         response = await controller.restore_note_by_id(note_id)
-        return response
+        return {"message": "success", "response": response}
     except Exception as e:
         return {"message": "failed", "error": str(e)}
 
@@ -55,7 +55,7 @@ async def restore_trash_note(note_id: str):
 async def delete_note(note_id: str):
     try:
         response = await controller.delete_note_by_id_permanently(note_id)
-        return response
+        return {"message": "success", "response": response}
     except Exception as e:
         return {"message": "failed", "error": str(e)}
 
@@ -64,7 +64,7 @@ async def delete_note(note_id: str):
 async def search_notes(search_query: str):
     try:
         notes = await controller.search_notes_by_prompt(search_query)
-        return notes
+        return {"message": "success", "response": notes}
     except Exception as e:
         return {"message": "failed", "error": str(e)}
 
