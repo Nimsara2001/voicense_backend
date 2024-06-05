@@ -3,26 +3,11 @@ from pydantic import BaseModel, Field
 
 class Note(BaseModel):
     title: str = Field(...)
-    description: str = Field(...)  # show in the note view card
+    description: str = Field(...)
     content: str = Field(...)
-    created_date: str
-    last_accessed: str
+    created_date: str = Field(...)
+    last_accessed: str = Field(...)
     is_deleted: bool = Field(default=False)
-
-    class Config:
-        json_schema_extra = {
-            "example": {
-                "_id": "60d5ec88b35866cc8fe16e6e",
-                "title": "Python Programming",
-                "description": "Python is a programming language that lets you work quickly and integrate systems "
-                               "more effectively.",
-                "content": "Python is a programming language that lets you work quickly and integrate systems more "
-                           "effectively. It is a powerful language that is easy to learn and easy to read. Python is a",
-                "created_date": "2021-06-01",
-                "last_accessed": "2021-06-01 20:47:06.932514",
-
-            }
-        }
 
 
 def get_note_schema(note):

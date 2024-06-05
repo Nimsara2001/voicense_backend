@@ -1,11 +1,58 @@
 # Test your FastAPI endpoints
 
+@note_id ="665b99cc46cc915e4454ebf5"
+
 GET http://127.0.0.1:8000/
 Accept: application/json
 
 ###
-
-GET http://127.0.0.1:8000/hello/User
-Accept: application/json
+# @name get_recent_notes
+GET http://localhost:8000/note/recent
 
 ###
+
+# @name view_note
+GET http://localhost:8000/note/@note_id
+Content-Type: application/json
+
+###
+
+# @name update_accessed
+PUT http://localhost:8000/note/update_accessed/@note_id
+Content-Type: application/json
+
+###
+
+# @name trash_note
+PUT http://localhost:8000/note/trash/@note_id
+Content-Type: application/json
+
+###
+
+# @name restore_trash_note
+POST http://localhost:8000/note/restore/@note_id
+Content-Type: application/json
+
+###
+
+# @name delete_note
+DELETE http://localhost:8000/note/delete/@note_id
+Content-Type: application/json
+
+###
+
+# @name search_notes
+POST http://localhost:8000/note/search
+Content-Type: application/json
+{
+  "search_query": "Sample"
+}
+
+###
+
+# @name share_note
+POST http://localhost:8000/note/share/@note_id
+Content-Type: application/json
+
+
+

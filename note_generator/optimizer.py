@@ -22,27 +22,30 @@ def optimize_note(transcription):
                     {"con": cohesive_prompt, "overall_topic": overall_topic, "previous_answer": previous_answer})
                 # print(response)
                 complete_response = complete_response + response
-                print(k)
+                # print(k)
                 k = k + 1
                 previous_answer = response
 
             # print(complete_response)
-            print("starting invoking chain 2..")
+            # print("starting invoking chain 2..")
 
             final_answer = chain2.invoke({"domain": complete_response})
 
-            return final_answer
+            return {"message": "success", "title": overall_topic, "content": final_answer}
 
         except Exception as e:
             print(f"An error occurred on attempt {attempt + 1}: {e}")
             attempt += 1
 
-    print("Failed to complete the process after multiple attempts.")
-    return None
+    return {"message": "failed", "details": "Failed to generate note"}
 
 
 def get_overall_topic(transcription):
-    print("starting topic generation...")
-    topic = chain0.invoke({"transcript": transcription})
-    print(topic)
-    return topic
+    try:
+        # print("starting topic generation...")
+        topic = chain0.invoke({"transcript": transcription})
+        # print(topic)
+        return topic
+    except Exception as e:
+        print(f"An error occurred while generating the topic: {e}")
+        return "Untitled Note"

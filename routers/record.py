@@ -1,6 +1,7 @@
 from typing import Annotated
-from fastapi import APIRouter, UploadFile, File, Body, BackgroundTasks
+from fastapi import APIRouter, UploadFile, File, Body
 import controller.transcription_controller as controller
+from controller.note_controller import save_note_and_transcription
 from note_generator.optimizer import optimize_note
 
 router = APIRouter(
@@ -13,36 +14,33 @@ async def upload_record(
         file: Annotated[UploadFile, File],
         user_id: Annotated[str, Body],
         module_id: Annotated[str, Body],
-        background_tasks: BackgroundTasks
 ):
-    # res = await controller.save_audio(file)
-    #
-    # if res["message"] == "failed":
-    #     return res
-    # else:
-    #     transcription = await controller.generate_transcription(res["path"])
-    #     note = optimize_note(transcription)
-    #
-    #
-    # return {
-    #     "path": res["path"], "message": "successful",
-    #     "details": {
-    #         "user_id": user_id,
-    #         "module_id": module_id
-    #     },
-    #     "transcription": transcription,
-    #     "note":note
-    # }
-    res = await controller.save_audio(file)
-    print(res["path"])
-    background_tasks.add_task(process_after_upload, res["path"], user_id, module_id)
+    try:
+        res = await controller.save_audio(file)
 
-    return {"message": "File uploaded successfully."}
+        if res["message"] == "failed":
+            return res
 
+        else:
+            transcription = await controller.generate_transcription(res["path"])
+            if transcription["message"] == "failed":
+                return transcription
 
-async def process_after_upload(path, user_id, module_id):
-    transcription = await controller.generate_transcription(path)
-    print(transcription)
+            note = optimize_note(transcription["result"])
+            if note["message"] == "failed":
+                return note
+            else:
+                db_save = await save_note_and_transcription(note, transcription["result"], module_id)
+                if db_save["message"] == "failed":
+                    return db_save
 
-    note = optimize_note(transcription)
-    print(note)
+                await controller.delete_audio(res["path"])
+
+        return {
+            "message": "successful",
+            "user_id": user_id,
+            "note_id": db_save["note_id"],
+            "module_id": db_save["module_id"]
+        }
+    except Exception as e:
+        return {"message": "failed", "error": str(e)}

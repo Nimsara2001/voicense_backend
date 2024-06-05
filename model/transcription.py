@@ -1,5 +1,3 @@
-from typing import Optional
-
 from bson import ObjectId
 from pydantic import BaseModel, Field
 
@@ -7,17 +5,10 @@ from pydantic import BaseModel, Field
 class Transcription(BaseModel):
     content: str = Field(...)
     generated_date: str = Field(...)
-    note_id: Optional[str] = Field(default=None)
+    note_id: ObjectId = Field(...)
 
     class Config:
         arbitrary_types_allowed = True
-        json_schema_extra = {
-            "example": {
-                "content": "Hello, my name is Chandu Nair and I am going to be handling the subject of marketing",
-                "generated_date": "2024-05-21",
-                "note_id": None
-            }
-        }
 
 
 def get_transcription_schema(transcription):
