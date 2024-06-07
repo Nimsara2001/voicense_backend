@@ -44,8 +44,8 @@ async def delete_module(user_id: str, module_id: str):
 
 
 @router.post("/add")
-async def add_module(user_id: str, module: Module):
-    res = await controller.add_module_func(module, user_id)
+async def add_module(user_id: str,title: str):
+    res = await controller.add_module_func(title, user_id)
     return res
 
 
