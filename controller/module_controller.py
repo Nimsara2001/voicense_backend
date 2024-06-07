@@ -192,14 +192,17 @@ async def trash_and_restore_module_func(module_id, is_trash: bool):
                 raise HTTPException(status_code=500, detail=str(e))
 
 
-async def add_module_func(module: Module, user_id: str):
+async def add_module_func(title: str, user_id: str):
     await get_collection()
 
-    if not re.match('^[a-zA-Z0-9 ]*$', module.title):
+    if not re.match('^[a-zA-Z0-9 ]*$', title):
         raise HTTPException(status_code=400, detail="Module title contains invalid characters")
 
-    module.created_date = str(datetime.now())
-    module.last_accessed = str(datetime.now())
+    module = Module(
+        title=title,
+        created_date=str(datetime.now()),
+        last_accessed=str(datetime.now())
+    )
 
     module_id = await modules_collection.insert_one(module.dict())
 
