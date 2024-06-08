@@ -65,7 +65,8 @@ async def signup_func(user: User):
         try:
             result = await user_collection.insert_one(user.dict())
             if result.inserted_id is None:
-                raise HTTPException(status_code=500, detail="User insertion failed")
+                raise HTTPException(
+                    status_code=500, detail="User insertion failed")
             return str(result.inserted_id)
         except Exception as e:
             raise HTTPException(status_code=500, detail=str(e))
@@ -113,7 +114,8 @@ def signJWT(user_id: str) -> Dict[str, str]:
 
 def decodeJWT(token: str) -> dict:
     try:
-        decoded_token = jwt.decode(token, JWT_SECRET_KEY, algorithms=[JWT_ALGORITHM])
+        decoded_token = jwt.decode(
+            token, JWT_SECRET_KEY, algorithms=[JWT_ALGORITHM])
         return decoded_token if decoded_token["expires"] >= time.time() else None
     except:
         return {}

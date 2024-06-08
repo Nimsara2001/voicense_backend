@@ -1,6 +1,6 @@
 import asyncio
 from fastapi import FastAPI, Depends, BackgroundTasks
-
+from fastapi.middleware.cors import CORSMiddleware
 from controller.auth_bearer import JWTBearer
 from routers import note, auth, module, record
 from db_config import get_db
@@ -34,3 +34,12 @@ async def test(background_tasks: BackgroundTasks, email: str):
     background_tasks.add_task(
         write_notification, email, message="some notification")
     return "Test notification sent in the background"
+
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["http://192.168.8.111:80"],
+    allow_credentials=True,
+    allow_methods=["GET", "POST", "OPTIONS"],
+    allow_headers=["*"]
+)

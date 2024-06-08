@@ -9,24 +9,22 @@ class UserType(str, Enum):
 
 
 class User(BaseModel):
-    user_type: UserType = Field(...)
-    first_name: str = Field(...)
-    last_name: str = Field(...)
     username: str = Field(...)
     password: str = Field(...)
-    email: str = Field(...)
+    first_name: str = Field(...)
+    last_name: str = Field(...)
+    user_type: UserType = Field(...)
     modules: Optional[list] = Field(default=[])
 
     class Config:
         arbitrary_types_allowed = True
         json_schema_extra = {
             "example": {
-                "user_type": "Student",
-                "first_name": "Mihin",
-                "last_name": "Premarathna",
                 "username": "mihin",
                 "password": "mihin123",
-                "email": "example@gmail.com",
+                "first_name": "Mihin",
+                "last_name": "Premarathna",
+                "user_type": "Student",
                 "modules": []
             }
         }
@@ -48,11 +46,9 @@ class LoginUser(BaseModel):
 def get_user_schema(user):
     return {
         "id": str(user["_id"]),
-        "user_type": user["user_type"],
-        "first_name": user["first_name"],
-        "last_name": user["last_name"],
         "username": user["username"],
         "hashed_password": str(user["password"]),
-        "email": user["email"],
-        "modules": [str(module_id) for module_id in user["modules"]]
+        "first_name": user["first_name"],
+        "last_name": user["last_name"],
+        "user_type": user["user_type"]
     }
