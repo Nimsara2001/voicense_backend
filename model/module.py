@@ -18,3 +18,8 @@ def get_module_schema(module):
         "created_date": module["created_date"],
         "last_accessed": module["last_accessed"]
     }
+
+class DeleteModuleRequest(BaseModel):
+    user_id: str
+    module_id: str
+    

@@ -8,7 +8,9 @@ router = APIRouter(
 
 @router.get("/recent")
 async def recent_notes(user_id: str):
+    # print("accesssesdd")
     notes = await controller.recently_accessed_notes(user_id)
+    # print(notes)
     return notes
 
 
@@ -17,6 +19,11 @@ async def view_note(note_id: str):
     note = await controller.get_note_by_id(note_id)
     return note
 
+@router.get("/trashed")
+async def get_all_trashed_notes(user_id:str):
+    print("trashed notes accessed")
+    notes = await controller.get_all_trashed_notes(user_id)
+    return notes
 
 @router.post("/update_accessed/{note_id}")
 async def update_accessed(note_id: str):
@@ -24,13 +31,14 @@ async def update_accessed(note_id: str):
     return response
 
 
-@router.post("/trash/{note_id}")
+@router.patch("/trash/{note_id}")
 async def trash_note(note_id: str):
+    print("trashed note",note_id)
     response = await controller.trash_and_restore_note_by_id(note_id, True)
     return response
 
 
-@router.post("/restore/{note_id}")
+@router.patch("/restore/{note_id}")
 async def restore_trash_note(note_id: str):
     response = await controller.trash_and_restore_note_by_id(note_id, False)
     return response
@@ -50,4 +58,5 @@ async def search_notes(search_query: str):
 
 @router.post("/share/{note_id}")  # implement later
 async def share_note(note_id: str):
+    print("note shared", note_id)
     return {"message": "Note shared"}
