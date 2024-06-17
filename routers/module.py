@@ -8,14 +8,14 @@ router = APIRouter(
 
 @router.get("/all")  # other module retrieved.can extract in frontend.
 async def get_all_modules(user_id: str):
+    print("all accessed------------")
     modules = await controller.get_all_modules_func(user_id)
+    print(modules)
     return modules
 
 @router.get("/trashed")
 async def get_all_trashed_modules(user_id: str):
-    print("trashed accessed")
     modules = await controller.get_all_trashed_modules(user_id)
-    print("trashed modules",modules)
     return modules
 
 
