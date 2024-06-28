@@ -1,6 +1,6 @@
 import asyncio
 from fastapi import FastAPI, Depends, BackgroundTasks
-
+from fastapi.middleware.cors import CORSMiddleware
 from controller.auth_bearer import JWTBearer
 from routers import note, auth, module, record
 from db_config import get_db
@@ -16,6 +16,13 @@ app.include_router(record.router, tags=["Record"],dependencies=[Depends(JWTBeare
 # app.include_router(module.router, tags=["Module"])
 # app.include_router(record.router, tags=["Record"])
 
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],
+    allow_credentials=True,  # Allow cookies for authenticated requests
+    allow_methods=["*"],  # Allow all HTTP methods (e.g., GET, POST, etc.)
+    allow_headers=["*"],  # Allow all headers from the frontend
+)
 
 @app.get("/")
 async def root():

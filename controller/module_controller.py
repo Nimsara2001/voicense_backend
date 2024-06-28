@@ -58,6 +58,30 @@ async def get_all_modules_func(user_id: str):
     return module_schemas
 
 
+async def get_all_trashed_modules(user_id: str):
+      await get_collection()
+      try:
+          user_id = ObjectId(user_id)
+      except InvalidId:
+            raise HTTPException(status_code=400, detail="Invalid user_id")
+      
+      user = await users_collection.find_one({"_id": user_id})
+      if user is None:
+            raise HTTPException(status_code=404, detail="User not found")
+      
+      trashed_modules = []
+      for module_id in user["modules"]:
+        module = await modules_collection.find_one({"_id": module_id, "is_deleted": True})
+        if module is not None:
+            trashed_modules.append(module)
+
+      if len(trashed_modules) == 0:
+              raise HTTPException(status_code=404, detail=f"No trashed modules found for the specified {user_id}")
+
+      return [get_module_schema(module) for module in trashed_modules]      
+      
+    
+
 async def get_all_notes_of_module_func(module_id: str):
     await get_collection()
     try:

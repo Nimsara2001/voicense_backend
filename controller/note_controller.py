@@ -96,6 +96,32 @@ async def get_note_by_id(note_id: str):
     else:
         raise HTTPException(status_code=404, detail="Note not found")
 
+async def get_all_trashed_notes(user_id:str):
+    await get_collection()
+    try:
+        user_id = ObjectId(user_id)
+    except InvalidId:
+        raise HTTPException(status_code=400, detail="Invalid user_id")
+
+    user=await users_collection.find_one({"_id":user_id});    
+
+    if user is None:
+        raise HTTPException(status_code=404, detail="User not found")
+    
+    trash_notes=[]
+    for module_id in user["modules"]:
+        module=await modules_collection.find_one({"_id":module_id,"is_deleted":False})
+        for note_id in module["notes"]:
+            note=await notes_collection.find_one({"_id":note_id,"is_deleted":True})
+            if note is not None:
+                trashed_note=get_note_schema(note)
+                trashed_note["module_id"]=str(module_id)
+                trash_notes.append(trashed_note)
+
+    if not trash_notes:
+        raise HTTPException(status_code=404, detail="No trashed notes found")      
+    return trash_notes
+      
 
 async def update_last_accessed(note_id: str):
     await get_collection()
