@@ -46,9 +46,8 @@ class LoginUser(BaseModel):
 def get_user_schema(user):
     return {
         "id": str(user["_id"]),
-        "username": user["username"],
-        "hashed_password": str(user["password"]),
+        "user_type": user["user_type"],
         "first_name": user["first_name"],
         "last_name": user["last_name"],
-        "user_type": user["user_type"]
+        "username": user["username"]
     }

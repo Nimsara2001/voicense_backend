@@ -10,7 +10,7 @@ from model.user import User, get_user_schema, LoginUser
 
 JWT_SECRET_KEY = "Ks9Tz2Ld7Xv8Yw5Qr6Uj3Nb1Ec0Fm4Oa"
 JWT_ALGORITHM = "HS256"
-JWT_ACCESS_TOKEN_EXPIRE = 60
+JWT_ACCESS_TOKEN_EXPIRE = 60  # in days
 
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 
@@ -23,7 +23,7 @@ async def set_collection():
     db = await get_db()
 
     if db is None:
-        raise Exception("Failed to get database connection")
+        raise HTTPException(status_code=500, detail="Database connection failed")
 
     if user_collection is None:
         user_collection = db["User"]
@@ -56,7 +56,9 @@ async def init_other_module(username: str):
 
 async def signup_func(user: User):
     await set_collection()
+
     user.password = get_password_hash(user.password)
+
     if await exist_user(user.username):
         return "exist_user"
     else:
@@ -65,8 +67,7 @@ async def signup_func(user: User):
         try:
             result = await user_collection.insert_one(user.dict())
             if result.inserted_id is None:
-                raise HTTPException(
-                    status_code=500, detail="User insertion failed")
+                raise HTTPException(status_code=500, detail="User insertion failed")
             return str(result.inserted_id)
         except Exception as e:
             raise HTTPException(status_code=500, detail=str(e))
@@ -105,7 +106,7 @@ def token_response(token: str):
 def signJWT(user_id: str) -> Dict[str, str]:
     payload = {
         "user_id": user_id,
-        "expires": time.time() + JWT_ACCESS_TOKEN_EXPIRE * 60*60*24
+        "expires": time.time() + JWT_ACCESS_TOKEN_EXPIRE * 60 * 60 * 24
     }
     token = jwt.encode(payload, JWT_SECRET_KEY, algorithm=JWT_ALGORITHM)
 
@@ -114,8 +115,7 @@ def signJWT(user_id: str) -> Dict[str, str]:
 
 def decodeJWT(token: str) -> dict:
     try:
-        decoded_token = jwt.decode(
-            token, JWT_SECRET_KEY, algorithms=[JWT_ALGORITHM])
+        decoded_token = jwt.decode(token, JWT_SECRET_KEY, algorithms=[JWT_ALGORITHM])
         return decoded_token if decoded_token["expires"] >= time.time() else None
     except:
         return {}
