@@ -60,3 +60,8 @@ async def search_notes(search_query: str):
 async def share_note(note_id: str):
     print("note shared", note_id)
     return {"message": "Note shared"}
+
+@router.put("/insert_recent")
+async def insert_to_recent(userId:str,noteId:str):
+    response = await controller.insert_to_recentNoteList(userId,noteId)
+    return response
