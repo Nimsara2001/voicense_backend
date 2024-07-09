@@ -1,6 +1,6 @@
 from fastapi import APIRouter
 import controller.note_controller as controller
-
+from fastapi.responses import FileResponse
 router = APIRouter(
     prefix="/note"
 )
@@ -19,11 +19,13 @@ async def view_note(note_id: str):
     note = await controller.get_note_by_id(note_id)
     return note
 
+
 @router.get("/trashed")
-async def get_all_trashed_notes(user_id:str):
+async def get_all_trashed_notes(user_id: str):
     print("trashed notes accessed")
     notes = await controller.get_all_trashed_notes(user_id)
     return notes
+
 
 @router.post("/update_accessed/{note_id}")
 async def update_accessed(note_id: str):
@@ -33,7 +35,7 @@ async def update_accessed(note_id: str):
 
 @router.patch("/trash/{note_id}")
 async def trash_note(note_id: str):
-    print("trashed note",note_id)
+    print("trashed note", note_id)
     response = await controller.trash_and_restore_note_by_id(note_id, True)
     return response
 
@@ -50,7 +52,7 @@ async def delete_note(module_id: str, note_id: str):
     return response
 
 
-@router.post("/search") # try to implement in frontend
+@router.post("/search")  # try to implement in frontend
 async def search_notes(search_query: str):
     notes = await controller.search_notes_by_prompt(search_query)
     return notes
@@ -60,6 +62,13 @@ async def search_notes(search_query: str):
 async def share_note(note_id: str):
     print("note shared", note_id)
     return {"message": "Note shared"}
+
+
+@router.get("/download/{note_id}")
+async def download_note(note_id: str):
+    response = await controller.download_note_by_id(note_id)
+    file_path = response["path"]  # Assuming this is the path to the PDF file
+    return FileResponse(path=file_path, media_type='application/pdf', filename=file_path.split("/")[-1])
 
 @router.put("/insert_recent")
 async def insert_to_recent(userId:str,noteId:str):

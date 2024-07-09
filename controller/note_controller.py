@@ -1,3 +1,4 @@
+import os
 from datetime import datetime
 import re
 
@@ -8,6 +9,9 @@ from bson.errors import InvalidId
 
 from model.note import Note, get_note_schema
 from model.transcription import Transcription
+
+from mistletoe import markdown
+from fpdf import FPDF
 
 notes_collection = None
 transcriptions_collection = None
@@ -126,32 +130,33 @@ async def get_note_by_id(note_id: str):
     else:
         raise HTTPException(status_code=404, detail="Note not found")
 
-async def get_all_trashed_notes(user_id:str):
+
+async def get_all_trashed_notes(user_id: str):
     await get_collection()
     try:
         user_id = ObjectId(user_id)
     except InvalidId:
         raise HTTPException(status_code=400, detail="Invalid user_id")
 
-    user=await users_collection.find_one({"_id":user_id});    
+    user = await users_collection.find_one({"_id": user_id});
 
     if user is None:
         raise HTTPException(status_code=404, detail="User not found")
-    
-    trash_notes=[]
+
+    trash_notes = []
     for module_id in user["modules"]:
-        module=await modules_collection.find_one({"_id":module_id,"is_deleted":False})
+        module = await modules_collection.find_one({"_id": module_id, "is_deleted": False})
         for note_id in module["notes"]:
-            note=await notes_collection.find_one({"_id":note_id,"is_deleted":True})
+            note = await notes_collection.find_one({"_id": note_id, "is_deleted": True})
             if note is not None:
-                trashed_note=get_note_schema(note)
-                trashed_note["module_id"]=str(module_id)
+                trashed_note = get_note_schema(note)
+                trashed_note["module_id"] = str(module_id)
                 trash_notes.append(trashed_note)
 
     if not trash_notes:
-        raise HTTPException(status_code=404, detail="No trashed notes found")      
+        raise HTTPException(status_code=404, detail="No trashed notes found")
     return trash_notes
-      
+
 
 # async def update_last_accessed(note_id: str):
 #     await get_collection()
@@ -331,3 +336,32 @@ async def search_notes_by_prompt(search_query: str):
 #         f.write(content)
 #
 #     return file_path
+
+
+async def download_note_by_id(note_id: str):
+    await get_collection()
+    try:
+        note_id = ObjectId(note_id)
+    except InvalidId:
+        raise HTTPException(status_code=400, detail="Invalid note_id")
+
+    note = await notes_collection.find_one({"_id": note_id, "is_deleted": False})
+
+    if note is None:
+        raise HTTPException(status_code=404, detail="Note not found")
+
+    content_md = note["content"]
+    html = markdown(content_md)
+
+    os.makedirs("resources/download", exist_ok=True)
+
+    file_path = f"resources/download/{note['title']}.pdf"
+
+    pdf = FPDF()
+    pdf.set_font("Arial", size=12)
+    pdf.add_page()
+    pdf.write_html(html)
+
+    pdf.output(file_path)
+
+    return {"message": "success", "path": file_path}
