@@ -16,10 +16,11 @@ pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 
 user_collection = None
 modules_collection = None
+recentNotes_collection = None
 
 
 async def set_collection():
-    global user_collection, modules_collection
+    global user_collection, modules_collection,recentNotes_collection
     db = await get_db()
 
     if db is None:
@@ -30,6 +31,9 @@ async def set_collection():
 
     if modules_collection is None:
         modules_collection = db["Module"]
+
+    if recentNotes_collection is None:
+        recentNotes_collection = db["RecentNotes"]   
 
 
 async def exist_user(username: str) -> bool:
@@ -53,6 +57,18 @@ async def init_other_module(username: str):
     result = await modules_collection.insert_one(new_module.dict())
     return result.inserted_id
 
+async def init_recent_note_document(userId:str):
+    await set_collection()
+    try:
+        recentNote_user_doc = {
+            "userId":userId,
+            "recentNotes":[]
+        }
+        result = await recentNotes_collection.insert_one(recentNote_user_doc)
+        return result.inserted_id
+    except Exception as e:
+        print(e)
+        raise HTTPException(status_code=500, detail=str(e))
 
 async def signup_func(user: User):
     await set_collection()
@@ -63,11 +79,12 @@ async def signup_func(user: User):
         return "exist_user"
     else:
         other_module_id = await init_other_module(user.username)
-        user.modules.append(other_module_id)
+        user.modules.append(other_module_id) 
         try:
             result = await user_collection.insert_one(user.dict())
             if result.inserted_id is None:
                 raise HTTPException(status_code=500, detail="User insertion failed")
+            recentNote_user_document_id = await init_recent_note_document(str(result.inserted_id))
             return str(result.inserted_id)
         except Exception as e:
             raise HTTPException(status_code=500, detail=str(e))
