@@ -13,10 +13,12 @@ notes_collection = None
 transcriptions_collection = None
 modules_collection = None
 users_collection = None
+recentNotes_collection = None
+
 
 
 async def get_collection():
-    global notes_collection, transcriptions_collection, modules_collection, users_collection
+    global notes_collection, transcriptions_collection, modules_collection, users_collection,recentNotes_collection
     db = await get_db()
 
     if db is None:
@@ -34,48 +36,76 @@ async def get_collection():
     if users_collection is None:
         users_collection = db["User"]
 
+    if recentNotes_collection is None:
+        recentNotes_collection = db["RecentNotes"]     
+
+
+# async def recently_accessed_notes(user_id: str):
+#     await get_collection()
+
+#     try:
+#         user_id = ObjectId(user_id)
+#     except InvalidId:
+#         raise HTTPException(status_code=400, detail="Invalid user_id")
+
+#     pipeline = [
+#         {"$match": {"_id": user_id}},
+#         {"$unwind": "$modules"},
+#         {"$lookup": {
+#             "from": "Module",
+#             "localField": "modules",
+#             "foreignField": "_id",
+#             "as": "module"
+#         }},
+#         {"$unwind": "$module"},
+#         {"$match": {"module.is_deleted": False}},
+#         {"$unwind": "$module.notes"},
+#         {"$lookup": {
+#             "from": "Note",
+#             "localField": "module.notes",
+#             "foreignField": "_id",
+#             "as": "note"
+#         }},
+#         {"$unwind": "$note"},
+#         {"$match": {"note.is_deleted": False}},
+#         {"$sort": {"note.last_accessed": -1}},
+#         {"$limit": 10}
+#     ]
+
+#     recent_notes_cursor = users_collection.aggregate(pipeline)
+#     recent_notes = await recent_notes_cursor.to_list(length=100)
+
+#     if not recent_notes:
+#         raise HTTPException(status_code=404, detail="No notes found")
+
+#     recent_notes = [get_note_schema(note["note"]) for note in recent_notes]
+
+#     return recent_notes
 
 async def recently_accessed_notes(user_id: str):
     await get_collection()
-
     try:
-        user_id = ObjectId(user_id)
+        user_id=ObjectId(user_id)
     except InvalidId:
-        raise HTTPException(status_code=400, detail="Invalid user_id")
-
-    pipeline = [
-        {"$match": {"_id": user_id}},
-        {"$unwind": "$modules"},
-        {"$lookup": {
-            "from": "Module",
-            "localField": "modules",
-            "foreignField": "_id",
-            "as": "module"
-        }},
-        {"$unwind": "$module"},
-        {"$match": {"module.is_deleted": False}},
-        {"$unwind": "$module.notes"},
-        {"$lookup": {
-            "from": "Note",
-            "localField": "module.notes",
-            "foreignField": "_id",
-            "as": "note"
-        }},
-        {"$unwind": "$note"},
-        {"$match": {"note.is_deleted": False}},
-        {"$sort": {"note.last_accessed": -1}},
-        {"$limit": 10}
-    ]
-
-    recent_notes_cursor = users_collection.aggregate(pipeline)
-    recent_notes = await recent_notes_cursor.to_list(length=100)
-
-    if not recent_notes:
-        raise HTTPException(status_code=404, detail="No notes found")
-
-    recent_notes = [get_note_schema(note["note"]) for note in recent_notes]
-
-    return recent_notes
+        raise HTTPException(status_code=400, detail="Invalid userId")
+    
+    try:
+        recent_notes_list=[]
+        document = await recentNotes_collection.find_one({"userId":str(user_id)})
+        recent_notes=document["notes"]
+        for note_id in recent_notes:
+            try:
+                note_id=ObjectId(note_id)
+            except InvalidId:
+                raise HTTPException(status_code=400, detail="Invalid note_id")  
+              
+            note=await notes_collection.find_one({"_id":note_id})
+            recent_notes_list.append(get_note_schema(note))
+        print(recent_notes_list)    
+        return recent_notes_list
+    
+    except Exception as e:
+        raise HTTPException(status_code=404,detail="Notes not found")
 
 
 async def get_note_by_id(note_id: str):
@@ -91,7 +121,7 @@ async def get_note_by_id(note_id: str):
         raise HTTPException(status_code=500, detail=str(e))
 
     if note:
-        await update_last_accessed(str(note_id))
+        # await update_last_accessed(str(note_id))
         return get_note_schema(note)
     else:
         raise HTTPException(status_code=404, detail="Note not found")
@@ -123,24 +153,43 @@ async def get_all_trashed_notes(user_id:str):
     return trash_notes
       
 
-async def update_last_accessed(note_id: str):
+# async def update_last_accessed(note_id: str):
+#     await get_collection()
+#     try:
+#         note_id = ObjectId(note_id)
+#     except InvalidId:
+#         raise HTTPException(status_code=400, detail="Invalid note_id")
+
+#     updated_result = await notes_collection.update_one(
+#         {"_id": note_id, "is_deleted": False},
+#         {"$set": {"last_accessed": str(datetime.now())}}
+#     )
+
+#     if updated_result.modified_count == 1:
+#         return {"message": "success", "detail": f"Note with ID {note_id} last accessed updated"}
+#     else:
+#         raise HTTPException(status_code=404, detail=f"Note with ID {note_id} not found")
+
+async def insert_to_recentNoteList(userId:str,note_id: str):
     await get_collection()
     try:
-        note_id = ObjectId(note_id)
+        userId = ObjectId(userId)
     except InvalidId:
-        raise HTTPException(status_code=400, detail="Invalid note_id")
-
-    updated_result = await notes_collection.update_one(
-        {"_id": note_id, "is_deleted": False},
-        {"$set": {"last_accessed": str(datetime.now())}}
-    )
-
-    if updated_result.modified_count == 1:
-        return {"message": "success", "detail": f"Note with ID {note_id} last accessed updated"}
-    else:
-        raise HTTPException(status_code=404, detail=f"Note with ID {note_id} not found")
-
-
+        raise HTTPException(status_code=400, detail="Invalid userId")    
+    
+    MAX_LENGTH = 10
+    user_document = await recentNotes_collection.find_one({"userId":userId})
+    if user_document is not None:
+     updated_notes = user_document["notes"].append(note_id)
+     if len(updated_notes) > MAX_LENGTH:
+        updated_notes = updated_notes - updated_notes[:len(updated_notes) - MAX_LENGTH]
+     updated_notes_list = await recentNotes_collection.update_one({"userId":userId},{"$set":{"notes":updated_notes}})
+     if updated_notes_list.modified_count == 1:
+        return {"message": "success", "detail": f"Note with ID {note_id} inserted to the list"}       
+     else:
+        raise HTTPException(status_code=404, detail=f"User with ID {userId} not found")
+    
+         
 async def trash_and_restore_note_by_id(note_id: str, is_trash: bool):
     await get_collection()
     try:
