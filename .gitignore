@@ -3,4 +3,5 @@ __pycache__/
 .venv/
 venv/
 resources/audio/
+resources/download/
 test.py
