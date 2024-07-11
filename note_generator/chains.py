@@ -6,6 +6,8 @@ from langchain.schema.output_parser import StrOutputParser
 # Google API key
 os.environ['GOOGLE_API_KEY'] = "AIzaSyANwPvr4Stl9iMnonsaRpeAScB5WSjMlkY"
 
+# os.environ['GOOGLE_API_KEY'] = "AIzaSyBiewOfsnPvtyIh5gLN0CqJ1Z9XUpBuAX4"
+
 model = ChatGoogleGenerativeAI(model="gemini-pro", temperature=0.7)
 
 output_parser = StrOutputParser()
